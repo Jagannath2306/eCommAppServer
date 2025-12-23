@@ -1,6 +1,6 @@
 const Category = require('../models/category.model');
 const Joi = require('joi');
-const { uploadSingleImage } = require('../utils/uploadimagecategory');
+const { uploadSingleImage } = require('../utils/singleupload.category');
 const { CATEGORY_IMAGE_PATH } = process.env;
 
 

@@ -1,4 +1,4 @@
-const Category = require('../models/brandlogo.model');
+const Category = require('../models/category.model');
 const Joi = require('joi');
 const multer = require('multer');
 const path = require('path');

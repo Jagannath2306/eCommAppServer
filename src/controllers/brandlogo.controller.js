@@ -1,6 +1,6 @@
 const BrandLogo = require('../models/brandlogo.model');
 const Joi = require('joi');
-const { uploadSingleImage } = require('../utils/uploadimagebrandlogo');
+const { uploadSingleImage } = require('../utils/singleupload.brandlogo');
 const { BRANDLOGO_IMAGE_PATH } = process.env;
 
 
