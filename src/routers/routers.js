@@ -11,6 +11,7 @@ const contactusRouter = require("./contactus.router");
 const customerAddressRoute = require("./customeraddress.router");
 const productmasterstatusRoute = require("./productmasterstatus.router");
 const productstatusmappingRoute = require("./productstatusmapping.router");
+const modulemasterRoute = require("./modulemaster.router");
 
 module.exports = {
     userTypeRouter,
@@ -25,5 +26,6 @@ module.exports = {
     contactusRouter,
     customerAddressRoute,
     productmasterstatusRoute,
-    productstatusmappingRoute
+    productstatusmappingRoute,
+    modulemasterRoute
 }

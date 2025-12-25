@@ -28,6 +28,7 @@ const options = {
         "./src/routers/customeraddress.router.js",
         "./src/routers/productmasterstatus.router.js",
         "./src/routers/productstatusmapping.router.js",
+        "./src/routers/modulemaster.router.js",
     ]
 }
 module.exports = options;

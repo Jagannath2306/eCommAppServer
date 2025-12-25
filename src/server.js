@@ -41,6 +41,7 @@ APIRouter.use('/ContactUs',routers.contactusRouter);
 APIRouter.use('/CustomerAddress',routers.customerAddressRoute);
 APIRouter.use('/ProductMasterStatus',routers.productmasterstatusRoute);
 APIRouter.use('/ProductStatusMapping',routers.productstatusmappingRoute);
+APIRouter.use('/ModuleMaster',routers.modulemasterRoute);
 
 APIRouter.get(`/${process.env.BRANDLOGO_IMAGE_PATH}/*`, (req, res) => {
     const filePath = req.params[0];
@@ -53,6 +54,14 @@ APIRouter.get(`/${process.env.BRANDLOGO_IMAGE_PATH}/*`, (req, res) => {
 APIRouter.get(`/${process.env.CATEGORY_IMAGE_PATH}/*`, (req, res) => {
     const filePath = req.params[0];
     res.sendFile(filePath, { root: `./${process.env.CATEGORY_IMAGE_PATH}` }, (err)=>{
+        if(err){
+            res.status(404).json({success: false, message : "Image Not Found"});
+        }
+    });
+})
+APIRouter.get(`/${process.env.MENU_ICON_IMAGE_PATH}/*`, (req, res) => {
+    const filePath = req.params[0];
+    res.sendFile(filePath, { root: `./${process.env.MENU_ICON_IMAGE_PATH}` }, (err)=>{
         if(err){
             res.status(404).json({success: false, message : "Image Not Found"});
         }

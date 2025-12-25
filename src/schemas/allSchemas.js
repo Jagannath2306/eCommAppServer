@@ -11,6 +11,7 @@ const contactusSchema = require('./contactus.schema');
 const customerAddressSchema = require('./customeraddress.schema');
 const productmasterstatusSchema = require('./productmasterstatus.schema');
 const productstatusmappingSchema = require('./productstatusmapping.schema');
+const modulemasterSchema = require('./modulemaster.schema');
 
 const AllSchemas = {
     components: {
@@ -35,6 +36,7 @@ const AllSchemas = {
             ...customerAddressSchema.components.schemas,
             ...productmasterstatusSchema.components.schemas,
             ...productstatusmappingSchema.components.schemas,
+            ...modulemasterSchema.components.schemas
         }
     }
 }
