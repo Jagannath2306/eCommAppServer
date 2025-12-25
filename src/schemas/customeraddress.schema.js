@@ -39,8 +39,8 @@ module.exports = {
                 type: "object",
                 required: ['pageSize', 'page', "sortCol", "sort"],
                 properties: {
-                    pageSize: { type: "string" },
-                    page: { type: "string" },
+                    pageSize: { type: "number" },
+                    page: { type: "number" },
                     sortCol: { type: "string" },
                     sort: { type: "string" }
                 }

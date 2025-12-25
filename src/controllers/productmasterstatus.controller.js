@@ -1,41 +1,38 @@
-const Color = require('../models/color.model');
+const ProductMasterStatus = require('../models/productmasterstatus.model');
 const Joi = require('joi');
 
-const saveColor = async (req, res) => {
+const saveProductMasterStatus = async (req, res) => {
     const loggedInUser = req.session.user;
 
     const Schema = Joi.object({
-        name: Joi.string().min(3).max(20).required(),
-        code: Joi.string().min(7).max(20).required()
+        name: Joi.string().min(2).max(20).required()
     });
 
     const result = Schema.validate(req.body);
     if (result.error) {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
+    if (!loggedInUser || !loggedInUser.id) {
+        return res.status(401).json({ success: false, message: "Unauthorized access" });
+    }
 
     const name = result.value.name;
-    const code = result.value.code;
-    const color = new Color({ name: name, code: code, createdBy: loggedInUser.id });
-
-    let isExists = await Color.isExists(name, code);
-    if (!isExists) {
-        let result = await color.save();
-        res.status(201).json({ success: true, message: "Color Saved Successfully !!" });
+    let isExist = await ProductMasterStatus.isExists(name);
+    if (!isExist) {
+        let productmasterstatus = await new ProductMasterStatus({ ...result.value, createdBy: loggedInUser.id }).save();
+        res.status(201).json({ success: true, message: "Product Master Status Saved Successfully !!" });
     } else {
-        res.status(400).json({ success: false, message: `Color Name ${name} or Code ${code} already exists !!` });
-        return;
+        return res.status(400).json({ success: false, message: `Product Master Status Name ${name} already exists !!` });
     }
 }
 
 
-const updateColor = async (req, res) => {
+const updateProductMasterStatus = async (req, res) => {
     const loggedInUser = req.session.user;
 
     const Schema = Joi.object({
         id: Joi.string().required(),
-        name: Joi.string().min(3).max(20).required(),
-        code: Joi.string().min(7).max(20).required()
+        name: Joi.string().min(2).max(20).required()
     });
 
     const result = Schema.validate(req.body);
@@ -43,22 +40,23 @@ const updateColor = async (req, res) => {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
+    if (!loggedInUser || !loggedInUser.id) {
+        return res.status(401).json({ success: false, message: "Unauthorized access" });
+    }
     const name = result.value.name;
-    const code = result.value.code;
-    const colorId = result.value.id;
+    const id = result.value.id;
 
 
-    let isExists = await Color.isExists(name, code, colorId);
+    let isExists = await ProductMasterStatus.isExists(name, id);
     if (!isExists) {
-        await Color.findOneAndUpdate({ _id: colorId }, { ...result.value, updatedBy: loggedInUser.id });
-        res.status(201).json({ success: true, message: "Color Updated Successfully !!" });
+        await ProductMasterStatus.findOneAndUpdate({ _id: id }, { name: name, updatedBy: loggedInUser.id });
+        res.status(201).json({ success: true, message: "Product Master Status Updated Successfully !!" });
     } else {
-        res.status(400).json({ success: false, message: `Color Name ${name} or Code ${code} already exists !!` });
-        return;
+       return res.status(400).json({ success: false, message: `Product Master Status Name ${name} already exists !!` });
     }
 }
 
-const getAllColors = async (req, res) => {
+const getAllProductMasterStatus = async (req, res) => {
     const schema = Joi.object({
         pageSize: Joi.number().min(5).required(),
         page: Joi.number().min(1).required(),
@@ -77,14 +75,14 @@ const getAllColors = async (req, res) => {
     const sortObject = {};
     sortObject[sortCol] = sortBy === 'asc' ? 1 : -1;
 
-    const rows = await Color.find({ isActive: true })
+    const rows = await ProductMasterStatus.find({ isActive: true })
         .sort(sortObject)
         .skip(skipCount)
         .limit(limitVal)
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
     let count = 0;
-    count = await Color.countDocuments({ isActive: true });
+    count = await ProductMasterStatus.countDocuments({ isActive: true });
     return res.status(200).json({
         success: true,
         data: rows,
@@ -96,20 +94,21 @@ const getAllColors = async (req, res) => {
     });
 }
 
-const getColorById = async (req, res) => {
-    const id = req.params.id;
 
-    const color = await Color.findOne({ _id: id, isActive: true })
+const getProductMasterStatusById = async (req, res) => {
+    const id = req.body.id;
+
+    const productmasterstatus = await ProductMasterStatus.findOne({ _id: id, isActive: true })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
-    if (color) {
-        res.status(200).json({ success: true, data: color });
+    if (productmasterstatus) {
+        res.status(200).json({success: true, data: productmasterstatus});
     } else {
         res.status(402).json({ success: false, message: "Data not found" });
     }
 }
 
-const deleteColor = async (req, res) => {
+const deleteSize = async (req, res) => {
     const loggedInUser = req.session.user;
 
     const Schema = Joi.object({
@@ -121,16 +120,15 @@ const deleteColor = async (req, res) => {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
-    const colorId = result.value.id;
+    const userTypeId = result.value.id;
 
-    let isExists = await Color.findOne({ _id: colorId, isActive: true }, { name: 1 });
+    let isExists = await Size.findOne({ _id: userTypeId, isActive: true }, { name: 1 });
     if (isExists) {
-        await Color.findOneAndUpdate({ _id: colorId }, { isActive: false, updatedBy: loggedInUser.id });
-        res.status(201).json({ success: true, message: "Color Deleted Successfully !!" });
+        await Size.findOneAndUpdate({ _id: userTypeId }, { isActive: false, updatedBy: loggedInUser.id });
+        res.status(201).json({ success: true, message: "Size Deleted Successfully !!" });
     } else {
-        res.status(402).json({ success: false, message: `Record not found to delete !!` });
-        return;
+      return  res.status(402).json({ success: false, message: `Record not found to delete !!` });
     }
 }
 
-module.exports = { saveColor, updateColor, deleteColor, getColorById, getAllColors }
+module.exports = { saveSize, updateSize, deleteSize, getSizeById, getAllSize }

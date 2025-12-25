@@ -28,9 +28,9 @@ function validateLoginUser(user) {
 const addUser = async (req, res) => {
     const result = validateUser(req.body);
 
-    // if (result.error) {
-    //     return res.status(400).send({ error: result.error.details[0].message });
-    // }
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
     const userData = result.value;
     // We have to Check Password and Confirm Password Equality
@@ -38,9 +38,9 @@ const addUser = async (req, res) => {
     let isExist = await User.isExists(userData.email);
     if (!isExist) {
         let user = await new User(userData).save();
-        res.status(201).json(user);
+        res.status(201).json({ success: true, data: user });
     } else {
-        return res.send({ error: "Email Id already exists !!" });
+        return res.send({ success: false, message: "Email Id already exists !!" });
     }
 }
 
@@ -48,7 +48,7 @@ const loginUser = async (req, res) => {
     const result = validateLoginUser(req.body);
 
     if (result.error) {
-        return res.status(400).send({ error: result.error.details[0].message });
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
     const { email, password } = result.value;
@@ -66,12 +66,12 @@ const loginUser = async (req, res) => {
                 userTypeName: user.userTypeId.name
             }
             const token = jwt.sign(payload, process.env.JWT_KEY);
-            return res.json({ message: "Login Success !!", token })
+            return res.json({ success: true, message: "Login Success !!", data: token });
         } else {
-            return res.status(402).send({ error: "Invalid Credential !!" });
+            return res.status(402).send({ success: false, message: "Invalid Credential !!" });
         }
     } else {
-        return res.status(402).send({ error: "User Not Found !!" });
+        return res.status(402).send({ success: false, message: "User Not Found !!" });
     }
 }
 
@@ -82,12 +82,12 @@ const updateProfile = async (req, res) => {
     });
     const result = schema.validate(req.body);
     if (result.error) {
-        return res.status(400).send({ error: result.error.details[0].message });
-    }
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }   
 
     const loggedInUser = req.session.user;
     await User.findOneAndUpdate({ _id: loggedInUser.id }, result.value);
-    res.json({ message: "User Profile Updated Successfully !!" });
+   return res.json({ success: true, message: "User Profile Updated Successfully !!" });
 }
 
 const updateUserById = async (req, res) => {
@@ -97,25 +97,35 @@ const updateUserById = async (req, res) => {
     });
     const result = schema.validate(req.body);
     if (result.error) {
-        return res.status(400).send({ error: result.error.details[0].message });
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
     const loggedInUser = req.session.user;
-    
+
     await User.findOneAndUpdate({ _id: req.params.id, isActive: true }, { ...result.value, updatedBy: loggedInUser.id })
         .populate({ path: 'userTypeId', select: 'name' })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
-    res.json({ message: "User Profile Updated Successfully !!" });
+    res.json({ success: true,   message: "User Profile Updated Successfully !!" });
 }
 
 const getAllUsers = async (req, res) => {
-    const limitVal = Number.parseInt(req.body.pageSize) || 10;
-    const page = Number.parseInt(req.body.page) || 1;
-    const skipCount = limitVal * (page - 1);
-    const sortCol = req.body.sortCol;
-    const sortBy = req.body.sort || 'asc';
+    const schema = Joi.object({
+        pageSize: Joi.number().min(5).required(),
+        page: Joi.number().min(1).required(),
+        sortCol: Joi.string().required(),
+        sort: Joi.string().valid('asc', 'desc').required()
+    });
+    const result = schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
+    const limitVal = Number.parseInt(result.value.pageSize) || 10;
+    const page = Number.parseInt(result.value.page) || 1;
+    const skipCount = limitVal * (page - 1);
+    const sortCol = result.value.sortCol;
+    const sortBy = result.value.sort || 'asc';
     const sortObject = {};
     sortObject[sortCol] = sortBy === 'asc' ? 1 : -1;
 
@@ -128,7 +138,15 @@ const getAllUsers = async (req, res) => {
         .populate({ path: 'updatedBy', select: 'firstName lastName email' })
     let count = 0;
     count = await User.countDocuments({ isActive: true });
-    res.json({ rows, count });
+    return res.status(200).json({
+        success: true,
+        data: rows,
+         meta: {
+            page : page,
+            pageSize : limitVal,
+            total: count
+        }
+    });
 }
 
 const deleteUserById = async (req, res) => {
@@ -136,23 +154,22 @@ const deleteUserById = async (req, res) => {
     let isExists = await User.findOne({ _id: req.params.id, isActive: true }, { name: 1 });
     if (isExists) {
         await User.findOneAndUpdate({ _id: req.params.id, isActive: true }, { isActive: false, updatedBy: loggedInUser.id });
-        res.status(201).json({ message: "User Deleted Successfully !!" });
+        res.status(201).json({ success: false, message: "User Deleted Successfully !!" });
     } else {
-        res.status(402).json({ Error: `Record not found to delete !!` });
-        return;
+        return res.status(402).json({ success: false, message: `Record not found to delete !!` });
     }
 }
 
 const getUserById = async (req, res) => {
     const id = req.params.id;
     const user = await User.findOne({ _id: id, isActive: true })
-     .populate({ path: 'userTypeId', select: 'name' })
+        .populate({ path: 'userTypeId', select: 'name' })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
     if (user) {
-        res.json({ user });
+        res.json({ success: true, data: user });
     } else {
-        res.status(402).json({ error: "Data not found" });
+        res.status(402).json({ success: false, message: "Data not found" });
     }
 }
 
@@ -165,17 +182,16 @@ const validateUserEmail = async (req, res) => {
 
     const result = Schema.validate(req.body);
     if (result.error) {
-        return res.status(400).send({ error: result.error.details[0].message });
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
     const email = result.value.email;
 
     let isExists = await User.isExists(email);
     if (!isExists) {
-        res.status(400).json({ error: "User doesn't exist !!" });
+        res.status(400).json({ success: false, message: "User doesn't exist !!" });
     } else {
-        res.status(200).json({ message: `User exist` });
-        return;
+        return res.status(200).json({ success: true, message: `User exist` });
     }
 }
 
@@ -190,7 +206,7 @@ const resetUserPassword = async (req, res) => {
 
     const result = Schema.validate(req.body);
     if (result.error) {
-        return res.status(400).send({ error: result.error.details[0].message });
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
     const email = result.value.email;
@@ -198,8 +214,7 @@ const resetUserPassword = async (req, res) => {
 
     let isExists = await User.isExists(email);
     if (!isExists) {
-        res.status(400).json({ error: "User doesn't exist !!" });
-        return;
+        return res.status(400).json({ success: false, message: "User doesn't exist !!" });
     }
     const user = await User.findOne({ email: email, isActive: true });
     if (user) {
@@ -208,18 +223,12 @@ const resetUserPassword = async (req, res) => {
         if (isPasswordMatch) {
             const newPassword = await bcrypt.hash(req.body.newPassword, 12);
             await User.findOneAndUpdate({ email: email, isActive: true }, { password: newPassword });
-            res.status(200).json({ message: "Password Reset Successfully !!" });
+            res.status(200).json({ success: true, message: "Password Reset Successfully !!" });
         } else {
-            res.status(400).json({ error: "Old Password didn't match !!" });
+           return res.status(400).json({ success: false, message: "Old Password didn't match !!" });
         }
     }
 }
 
 module.exports = { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, validateUserEmail, resetUserPassword }
-
-
-// Refresh Token
-// Reset Password
-
-//first Verfy
 

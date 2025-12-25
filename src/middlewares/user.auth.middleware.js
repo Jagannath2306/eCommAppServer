@@ -12,7 +12,7 @@ function userAuthMiddleware(req, res, next) {
         next();
     } catch (err) {
         res.status(401);
-        return res.json({ "Token Error": "Invalid Token !!" });
+        return res.json({ success: false, message: "Invalid Token !!" });
     }
 }
 
@@ -28,10 +28,10 @@ function customerAuthMiddleware(req, res, next) {
             return next();
         }
         res.status(403);
-        return res.json({ "Authorization Error": "You are not authorized to access !!" });
+        return res.json({ success: false, message: "You are not authorized to access !!" });
     } catch (err) {
         res.status(401);
-        return res.json({ "Token Error": "Invalid Token !!" });
+        return res.json({ success: false, message: "Invalid Token !!" });
     }
 }
 
@@ -49,11 +49,11 @@ function adminAuthMiddleware(req, res, next) {
             return next();
         }
         res.status(403);
-        return res.json({ "Authorization Error": "You are not authorized to access !!" });
+        return res.json({ success: false, message: "You are not authorized to access !!" });
 
     } catch (err) {
         res.status(401);
-        return res.json({ "Token Error": "Invalid Token !!" });
+        return res.json({ success: false, message: "Invalid Token !!" });
     }
 }
 

@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 
 if (!process.env.BRANDLOGO_IMAGE_PATH) {
-    throw new Error("BRANDLOGO_IMAGE_PATH is missing in .env");
+    throw new Error({success: false, message: "BRANDLOGO_IMAGE_PATH is missing in .env"});
 }
 
 const uploadFolderPath = path.join(__dirname, "../", process.env.BRANDLOGO_IMAGE_PATH);
@@ -16,13 +16,13 @@ const storage = multer.diskStorage({
     filename: async function (req, file, cb) {
         // Validate file extension
         if (!file.originalname.match(/\.(png|jpg)$/i)) {
-            return cb(new Error("Please Upload a valid file with ext png or jpg."));
+            return cb(new Error({success: false, message: "Please Upload a valid file with ext png or jpg."}));
         }
 
         try {
             const exists = await BrandLogo.isExists(req.body.name, req.body.id);
             if (exists) {
-                return cb(new Error(`BrandLogo Name ${req.body.name} already exists.`));
+                return cb(new Error({success: false, message: `BrandLogo Name ${req.body.name} already exists.`}));
             } else {
                 const imageName = file.originalname.split('.')[0];
                 const newFileName = `${imageName}-${Date.now()}${path.extname(file.originalname)}`;

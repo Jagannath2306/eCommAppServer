@@ -44,7 +44,7 @@ APIRouter.get(`/${process.env.BRANDLOGO_IMAGE_PATH}/*`, (req, res) => {
     const filePath = req.params[0];
     res.sendFile(filePath, { root: `./${process.env.BRANDLOGO_IMAGE_PATH}` }, (err)=>{
         if(err){
-            res.status(404).json({message : "Image Not Found"});
+            res.status(404).json({success: false, message : "Image Not Found"});
         }
     });
 })
@@ -52,7 +52,7 @@ APIRouter.get(`/${process.env.CATEGORY_IMAGE_PATH}/*`, (req, res) => {
     const filePath = req.params[0];
     res.sendFile(filePath, { root: `./${process.env.CATEGORY_IMAGE_PATH}` }, (err)=>{
         if(err){
-            res.status(404).json({message : "Image Not Found"});
+            res.status(404).json({success: false, message : "Image Not Found"});
         }
     });
 })
