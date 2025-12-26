@@ -1,12 +1,17 @@
 const BrandLogo = require('../models/brandlogo.model');
 const Joi = require('joi');
-const { uploadSingleImage } = require('../utils/singleupload.brandlogo');
-const { BRANDLOGO_IMAGE_PATH } = process.env;
+const { createUploader } = require('../utils/uploader/createuploader');
+const path = require('path');
 
+const uploadBrandLogo = createUploader({
+    uploadPath: path.join(__dirname, '../', process.env.BRANDLOGO_IMAGE_PATH),
+    fieldName: 'imagePath',
+    maxCount: 1,
+});
 
 const saveBrandLogo = async (req, res) => {
     //Handle File Upload 
-    uploadSingleImage(req, res, async function (err) {
+    uploadBrandLogo(req, res, async function (err) {
         if (err) {
             return res.status(400).send({ success: false, message: err.message });
         }
@@ -25,10 +30,15 @@ const saveBrandLogo = async (req, res) => {
             imagePath: Joi.string().required()
         });
 
-        const filePath = BRANDLOGO_IMAGE_PATH + "/" + req.file.filename;
+        const filePath = `${process.env.BRANDLOGO_IMAGE_PATH}/${req.file.filename}`;
         const result = Schema.validate({ name: req.body.name, imagePath: filePath });
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
+        }
+
+        const exists = await BrandLogo.isExists(result.value.name,);
+        if (exists) {
+            return res.status(400).json({ success: false, message: 'Brand name already exists' });
         }
 
         const name = result.value.name;
@@ -42,7 +52,7 @@ const saveBrandLogo = async (req, res) => {
 const updateBrandLogo = async (req, res) => {
     //Handle File Upload 
 
-    uploadSingleImage(req, res, async function (err) {
+    uploadBrandLogo(req, res, async function (err) {
         if (err) {
             return res.status(400).send({ success: false, message: err.message });
         }
@@ -62,7 +72,8 @@ const updateBrandLogo = async (req, res) => {
             imagePath: Joi.string().required()
         });
 
-        const filePath = BRANDLOGO_IMAGE_PATH + "/" + req.file.filename;
+         const filePath = `${process.env.BRANDLOGO_IMAGE_PATH}/${req.file.filename}`;
+
         const result = Schema.validate({ id: req.body.id, name: req.body.name, imagePath: filePath });
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
@@ -75,7 +86,6 @@ const updateBrandLogo = async (req, res) => {
         if (!brandLogo) {
             return res.status(400).send({ success: false, message: "Something Went Wrong while updating BrandLogo" });
         }
-
         return res.status(201).json({ success: true, message: "BrandLogo Updated Successfully !!" });
     });
 }

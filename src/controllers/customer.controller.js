@@ -2,9 +2,14 @@ const Customer = require("../models/customer.model");
 const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
-const { uploadSingleImage } = require('../utils/singleupload.customer');
-const { CUSTOMER_IMAGE_PATH } = process.env;
+const path = require('path');
+const { createUploader } = require('../utils/uploader/createuploader');
 
+const uploadCustomerProfile = createUploader({
+    uploadPath: path.join(__dirname, '../', process.env.CUSTOMER_IMAGE_PATH),
+    fieldName: 'profilePicture',
+    maxCount: 1,
+});
 
 function validateUser(user) {
     const schema = Joi.object({
@@ -80,7 +85,7 @@ const loginCustomer = async (req, res) => {
 }
 
 const updateCustomerProfile = async (req, res) => {
-    uploadSingleImage(req, res, async function (err) {
+    uploadCustomerProfile(req, res, async function (err) {
         if (err) {
             return res.status(400).send({ success: false, message: err.message });
         }
@@ -94,7 +99,7 @@ const updateCustomerProfile = async (req, res) => {
             phone: Joi.string().required().min(10).max(10).required(),
             profilePicture: Joi.string().required(),
         });
-        const filePath = CUSTOMER_IMAGE_PATH + "/" + req.file.filename;
+        const filePath = `${process.env.CUSTOMER_IMAGE_PATH}/${req.file.filename}`;
         const result = schema.validate({ ...req.body, profilePicture: filePath });
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });

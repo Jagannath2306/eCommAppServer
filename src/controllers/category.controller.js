@@ -1,12 +1,18 @@
 const Category = require('../models/category.model');
 const Joi = require('joi');
-const { uploadSingleImage } = require('../utils/singleupload.category');
-const { CATEGORY_IMAGE_PATH } = process.env;
+const path = require('path');
+const { createUploader } = require('../utils/uploader/createuploader');
+
+const uploadCategory = createUploader({
+    uploadPath: path.join(__dirname, '../', process.env.CATEGORY_IMAGE_PATH),
+    fieldName: 'imagePath',
+    maxCount :1,
+});
 
 
 const saveCategory = async (req, res) => {
     //Handle File Upload 
-    uploadSingleImage(req, res, async function (err) {
+    uploadCategory(req, res, async function (err) {
         if (err) {
             return res.status(400).send({ success: false, message: err.message });
         }
@@ -28,7 +34,7 @@ const saveCategory = async (req, res) => {
             imagePath: Joi.string().required()
         });
 
-        const filePath = CATEGORY_IMAGE_PATH + "/" + req.file.filename;
+        const filePath = `${process.env.CATEGORY_IMAGE_PATH}/${req.file.filename}`;
         const result = Schema.validate({ ...req.body, imagePath: filePath });
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
@@ -43,7 +49,7 @@ const saveCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
     //Handle File Upload 
-    uploadSingleImage(req, res, async function (err) {
+    uploadCategory(req, res, async function (err) {
         if (err) {
             return res.status(400).send({ success: false, message: err.message });
         }
@@ -66,7 +72,7 @@ const updateCategory = async (req, res) => {
             imagePath: Joi.string().required()
         });
 
-        const filePath = CATEGORY_IMAGE_PATH + "/" + req.file.filename;
+        const filePath = `${process.env.CATEGORY_IMAGE_PATH}/${req.file.filename}`;
         const result = Schema.validate({ ...req.body, imagePath: filePath });
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });

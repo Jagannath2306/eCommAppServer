@@ -1,12 +1,17 @@
 const Product = require('../models/product.model');
 const Joi = require('joi');
-const { uploadMultipleImage } = require('../utils/multipleupload.product');
-const { PRODUCT_IMAGE_PATH } = process.env;
+const path = require('path');
+const { createUploader } = require('../utils/uploader/createuploader');
 
+const uploadProduct = createUploader({
+    uploadPath: path.join(__dirname, '../', process.env.PRODUCT_IMAGE_PATH),
+    fieldName: 'imagePaths',
+    maxCount: 5,
+});
 
 const saveProduct = async (req, res) => {
     //Handle File Upload 
-    uploadMultipleImage(req, res, async function (err) {
+    uploadProduct(req, res, async function (err) {
         if (err) {
             return res.status(400).send({ success :false,message: err.message });
         }
@@ -42,9 +47,8 @@ const saveProduct = async (req, res) => {
             imagePaths: Joi.array().required()
         });
 
-        // const filePaths = PRODUCT_IMAGE_PATH + "/" + req.file.filename;
         let filePaths = [];
-         PRODUCT_IMAGE_PATH + "/" + req.files.map(file => filePaths.push(file.filename));
+         process.env.PRODUCT_IMAGE_PATH + "/" + req.files.map(file => filePaths.push(file.filename));
 
         const result = Schema.validate({ ...req.body, imagePaths: filePaths });
         if (result.error) {
@@ -60,7 +64,7 @@ const saveProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
     //Handle File Upload 
-    uploadMultipleImage(req, res, async function (err) {
+    uploadProduct(req, res, async function (err) {
         if (err) {
             return res.status(400).send({ success: false, message: err.message });
         }
@@ -98,9 +102,8 @@ const updateProduct = async (req, res) => {
             imagePaths: Joi.array().required()
         });
 
-        // const filePath = PRODUCT_IMAGE_PATH + "/" + req.file.filename;
         let filePaths = [];
-        PRODUCT_IMAGE_PATH + "/" + req.files.map(file => filePaths.push(file.filename));
+       process.env.PRODUCT_IMAGE_PATH + "/" + req.files.map(file => filePaths.push(file.filename));
 
         const result = Schema.validate({ ...req.body, imagePaths: filePaths });
         if (result.error) {
