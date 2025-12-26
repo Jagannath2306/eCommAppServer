@@ -42,6 +42,7 @@ APIRouter.use('/CustomerAddress',routers.customerAddressRoute);
 APIRouter.use('/ProductMasterStatus',routers.productmasterstatusRoute);
 APIRouter.use('/ProductStatusMapping',routers.productstatusmappingRoute);
 APIRouter.use('/ModuleMaster',routers.modulemasterRoute);
+APIRouter.use('/SubModuleMaster',routers.submodulemasterRoute);
 
 APIRouter.get(`/${process.env.BRANDLOGO_IMAGE_PATH}/*`, (req, res) => {
     const filePath = req.params[0];
