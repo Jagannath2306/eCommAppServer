@@ -35,6 +35,14 @@ module.exports = {
                         }
                     }
                 }
+            },
+            CancelOrder: {
+                type: 'object',
+                required: ['paymentId', 'cancelReason'],
+                properties: {
+                    paymentId: { type: "string" },
+                    cancelReason: { type: "string" }
+                }
             }
         }
     }

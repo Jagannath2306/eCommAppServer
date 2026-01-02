@@ -290,7 +290,7 @@ const getOrders = async (req, res) => {
                 as: 'PaymentMaster'
             }
         }, { $unwind: '$PaymentMaster' },
-         {
+        {
             $lookup: {
                 from: 'paymenttypes',
                 localField: 'PaymentMaster.paymentTypeId',
@@ -299,7 +299,7 @@ const getOrders = async (req, res) => {
                 as: 'PaymentType'
             }
         }, { $unwind: '$PaymentType' },
-         {
+        {
             $lookup: {
                 from: 'paymentstatuses',
                 localField: 'PaymentMaster.paymentStatusId',
@@ -308,7 +308,7 @@ const getOrders = async (req, res) => {
                 as: 'PaymentStatus'
             }
         }, { $unwind: '$PaymentStatus' },
-         {
+        {
             $lookup: {
                 from: 'orderstatuses',
                 localField: 'PaymentMaster.orderStatusId',
@@ -352,5 +352,36 @@ const getOrders = async (req, res) => {
     return res.status(200).json({ success: true, data: orders });
 };
 
+const cancelOrder = async (req, res) => {
+    const loggedInUser = req.session.customer;
 
-module.exports = { savePaymentMaster, getOrders };
+    if (!loggedInUser) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const schema = Joi.object({
+        paymentId: Joi.string().required(),
+        cancelReason: Joi.string().required()
+    });
+    const result = schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).json({
+            success: false,
+            message: result.error.details[0].message
+        });
+    }
+    const { paymentId, cancelReason } = result.value;
+
+    const isCancelled = await PaymentMaster.findOneAndUpdate({ _id: paymentId }, { $set: { orderStatusId: "6955528e4057097e4e69b5b6", paymentStatusId: "695551684057097e4e69b58a" } });
+    if (!isCancelled) {
+        return res.status(404).json({ success: false, message: "Payment record not found" });
+    }
+    const cancelorder = await new CancelOrder({
+        paymentId: paymentId,
+        cancelReason: cancelReason,
+        createdBy: loggedInUser.id
+    }).save();
+    return res.status(200).json({ success: true, message: "Order cancelled successfully" });
+};
+
+module.exports = { savePaymentMaster, getOrders, cancelOrder };

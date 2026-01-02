@@ -1,7 +1,7 @@
 const express = require('express');
 const paymentRouter = express.Router();
 const { customerAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { savePaymentMaster, getOrders } = require('../controllers/payment.controller');
+const { savePaymentMaster, getOrders, cancelOrder } = require('../controllers/payment.controller');
 
 
 /**
@@ -44,6 +44,24 @@ paymentRouter.post('/Save', customerAuthMiddleware, savePaymentMaster);
  *         description: Unauthorized
  */
 paymentRouter.get('/GetOrders', customerAuthMiddleware, getOrders);
+
+/**
+ * @swagger
+ * /api/Payment/CancelOrder:
+ *   post:
+ *     summary: Cancel Order
+ *     tags: [PaymentMaster]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CancelOrder'
+ *     responses:
+ *       201:
+ *         description: Order Cancelled Successfully
+ */
+paymentRouter.post('/CancelOrder', customerAuthMiddleware, cancelOrder);
 
 
 module.exports = paymentRouter;

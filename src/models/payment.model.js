@@ -250,9 +250,9 @@ const OnlinePaymentMasterSchema = new mongoose.Schema(
     }
 );
 const CancelOrderSchema = new mongoose.Schema({
-    billMasterId: {
+    paymentId: {
         type: mongoose.Types.ObjectId,
-        ref: "billmaster",
+        ref: "paymentmaster",
         required: true
     },
     cancelReason: {
@@ -261,10 +261,24 @@ const CancelOrderSchema = new mongoose.Schema({
     },
     cancelDate: {
         type: String,
-        default: new Date(),
-        required: true
+        default: new Date()
+    },
+    createdBy: {
+        type: mongoose.Types.ObjectId,
+        ref: "customermaster",
+        required: true,
+    },
+    modifiedBy: {
+        type: mongoose.Types.ObjectId,
+        ref: "customermaster",
+    },
+},
+    {
+        timestamps: {
+            createdAt: "createdOn",
+            updatedAt: "updatedOn",
+        },
     }
-}
 );
 
 
