@@ -49,6 +49,7 @@ APIRouter.use('/UserPageRights',routers.userpagerightsRoute);
 APIRouter.use('/PaymentType',routers.paymenttypeRoute);
 APIRouter.use('/PaymentStatus',routers.paymentstatusRoute);
 APIRouter.use('/OrderStatus',routers.orderstatusRoute);
+APIRouter.use('/Payment',routers.paymentRoute);
 
 APIRouter.get(`/${process.env.BRANDLOGO_IMAGE_PATH}/*`, (req, res) => {
     const filePath = req.params[0];

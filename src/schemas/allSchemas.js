@@ -18,6 +18,7 @@ const userpagerightsSchema = require('./userpagerights.schema');
 const paymenttypeSchema = require('./paymenttype.schema');
 const paymentstatusSchema = require('./paymentstatus.schema');
 const orderstatusSchema = require('./orderstatus.schema');
+const paymentSchema = require('./payment.schema');
 
 const AllSchemas = {
     components: {
@@ -48,7 +49,8 @@ const AllSchemas = {
             ...userpagerightsSchema.components.schemas,
             ...paymenttypeSchema.components.schemas,
             ...paymentstatusSchema.components.schemas,
-            ...orderstatusSchema.components.schemas
+            ...orderstatusSchema.components.schemas,
+            ...paymentSchema.components.schemas
         }
     }
 }

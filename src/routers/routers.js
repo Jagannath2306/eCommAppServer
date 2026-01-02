@@ -18,6 +18,7 @@ const userpagerightsRoute = require("./userpagerights.router");
 const paymenttypeRoute = require("./paymenttype.router");
 const paymentstatusRoute = require("./paymentstatus.router");
 const orderstatusRoute = require("./orderstatus.router");
+const paymentRoute = require("./payment.router");
 
 module.exports = {
     userTypeRouter,
@@ -39,5 +40,6 @@ module.exports = {
     userpagerightsRoute,
     paymenttypeRoute,
     paymentstatusRoute,
-    orderstatusRoute
+    orderstatusRoute,
+    paymentRoute
 }

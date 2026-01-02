@@ -34,7 +34,8 @@ const options = {
         "./src/routers/userpagerights.router.js",
         "./src/routers/paymenttype.router.js",
         "./src/routers/paymentstatus.router.js",
-        "./src/routers/orderstatus.router.js"
+        "./src/routers/orderstatus.router.js",
+        "./src/routers/payment.router.js",
     ]
 }
 module.exports = options;
