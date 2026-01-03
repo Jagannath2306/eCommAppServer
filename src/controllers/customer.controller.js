@@ -4,6 +4,7 @@ const Joi = require('joi');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const { createUploader } = require('../utils/uploader/createuploader');
+const sendEmail = require('../utils/sendEmail');
 
 const uploadCustomerProfile = createUploader({
     uploadPath: path.join(__dirname, '../', process.env.CUSTOMER_IMAGE_PATH),
@@ -39,7 +40,7 @@ const addCustomer = async (req, res) => {
     const result = validateUser(req.body);
 
     if (result.error) {
-        return res.status(400).send({success :false, message: result.error.details[0].message });
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
     // We have to Check Password and Confirm Password Equality
@@ -48,6 +49,15 @@ const addCustomer = async (req, res) => {
     let isExist = await Customer.isExists(userData.email);
     if (!isExist) {
         let customer = await new Customer(userData).save();
+        await sendEmail({
+            to: userData.email,
+            subject: 'BaggageApp - Signup Successful',
+            html: `<h2>Dear ${userData.firstName}, </h2>
+                        <h3>Welcome and thank you for registering with <a>BaggageApp</a> </h3>
+                        <h3> You have been Successful Singed in to Baggage App </h3>
+                        <h3>Click <a href='http://localhost:4200/user'>here</a> to Login</h3>
+                         <br/><br/><h3> We are happy to see you with us.</h3><h3> Team BaggageApp</h3>`
+        });
         res.status(201).json({ success: true, message: "Customer Registered Successfully !!" });
     } else {
         return res.send({ success: false, message: "Email Id already exists !!" });
@@ -117,16 +127,16 @@ const updateCustomerProfile = async (req, res) => {
 }
 
 const getAllCustomers = async (req, res) => {
-     const schema = Joi.object({
-            pageSize: Joi.number().min(5).required(),
-            page: Joi.number().min(1).required(),
-            sortCol: Joi.string().required(),
-            sort: Joi.string().valid('asc', 'desc').required()
-        });
-        const result = schema.validate(req.body);
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const schema = Joi.object({
+        pageSize: Joi.number().min(5).required(),
+        page: Joi.number().min(1).required(),
+        sortCol: Joi.string().required(),
+        sort: Joi.string().valid('asc', 'desc').required()
+    });
+    const result = schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
     const limitVal = Number.parseInt(result.value.pageSize) || 10;
     const page = Number.parseInt(result.value.page) || 1;
     const skipCount = limitVal * (page - 1);
@@ -141,12 +151,12 @@ const getAllCustomers = async (req, res) => {
         .limit(limitVal);
     let count = 0;
     count = await Customer.countDocuments({ isActive: true });
-     return res.status(200).json({
+    return res.status(200).json({
         success: true,
         data: rows,
-         meta: {
-            page : page,
-            pageSize : limitVal,
+        meta: {
+            page: page,
+            pageSize: limitVal,
             total: count
         }
     });
