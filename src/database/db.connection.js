@@ -13,10 +13,10 @@ const createConnection = async () => {
     try {
         const connection = await mongoose.connect(DB_URL);
         if (connection) {
-            console.log("Connection Successfully Created !!");
+            console.log("✅ Connection Successfully Created !!");
         }
     } catch (err) {
-        console.log("Error While Createing Connection :- " + err);
+        console.log("❌ Error While Createing Connection :- " + err);
         process.exit();
     }
 }

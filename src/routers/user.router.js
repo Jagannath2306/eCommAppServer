@@ -1,7 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const { adminAuthMiddleware, userAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, validateUserEmail,resetUserPassword } = require('../controllers/user.controller');
+const { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp } = require('../controllers/user.controller');
 
 
 
@@ -152,26 +152,26 @@ userRouter.put('/UpdateUserById/:id', adminAuthMiddleware, updateUserById);
 
 /**
   * @swagger
-  * /api/User/ValidateEmailId:
+  * /api/User/ForgotUserPassword:
   *   post:
-  *     summary: Validate User Email
+  *     summary: Forgot User password
   *     tags: [User]
   *     requestBody:
   *       required: true
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: '#/components/schemas/EmailValidation'
+  *             $ref: '#/components/schemas/ForgotUserPassword'
   *     responses:
   *       200:
-  *         description: Email validated successfully
+  *         description: Password Reset successfully
   */
-userRouter.post('/ValidateEmailId', userAuthMiddleware, validateUserEmail);
+userRouter.post('/ForgotUserPassword', forgotUserPassword);
 
 
 /**
   * @swagger
-  * /api/User/ResetPassword:
+  * /api/User/ResetUserPassword:
   *   post:
   *     summary: Reset User Password
   *     tags: [User]
@@ -180,11 +180,30 @@ userRouter.post('/ValidateEmailId', userAuthMiddleware, validateUserEmail);
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: '#/components/schemas/ResetPassword'
+  *             $ref: '#/components/schemas/ResetUserPassword'
   *     responses:
   *       200:
-  *         description: Password reset successfully
+  *         description: Password Reset successfully 
   */
-userRouter.post('/ResetPassword', userAuthMiddleware, resetUserPassword);
+userRouter.post('/ResetUserPassword', resetUserPassword);
+
+
+/**
+  * @swagger
+  * /api/User/ResendUserOtp:
+  *   post:
+  *     summary: Resend User OTP
+  *     tags: [User]
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             $ref: '#/components/schemas/ResendUserOtp'
+  *     responses:
+  *       200:
+  *         description: OTP send successfully
+  */
+userRouter.post('/ResendUserOtp', resendUserOtp);
 
 module.exports = userRouter;

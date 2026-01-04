@@ -22,8 +22,7 @@ const logFile = path.join(
 const logger = winston.createLogger({
   transports: [
     new winston.transports.File({
-      filename: logFile,
-      handleExceptions: true
+      filename: logFile
     }),
     new winston.transports.MongoDB({
       db: DB_URL,
