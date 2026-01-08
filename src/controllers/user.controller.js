@@ -58,7 +58,7 @@ const addUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const result = validateLoginUser(req.body);
-
+    console.log(req.body)
     if (result.error) {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
@@ -80,10 +80,10 @@ const loginUser = async (req, res) => {
             const token = jwt.sign(payload, process.env.JWT_KEY);
             return res.json({ success: true, message: "Login Success !!", data: token });
         } else {
-            return res.status(402).send({ success: false, message: "Invalid Credential !!" });
+            return res.status(401).send({ success: false, message: "Invalid Credential !!" });
         }
     } else {
-        return res.status(402).send({ success: false, message: "User Not Found !!" });
+        return res.status(401).send({ success: false, message: "Invalid Credential" });
     }
 }
 
