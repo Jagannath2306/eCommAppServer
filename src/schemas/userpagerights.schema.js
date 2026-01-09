@@ -59,9 +59,9 @@ module.exports = {
             },
             GetPageRightsByUser: {
                 type: "object",
-                required: ['userId'],
+                required: ['email'],
                 properties: {
-                    userId: { type: "string" }
+                    email: { type: "string" }
                 }
             },
             UpdateMenuConfig: {

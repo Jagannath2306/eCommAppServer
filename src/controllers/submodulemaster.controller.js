@@ -1,26 +1,9 @@
 const SubModuleMaster = require('../models/submodulemaster.model');
 const Joi = require('joi');
 const path = require('path');
-const { createUploader } = require('../utils/uploader/createuploader');
-
-const uploadCustomer = createUploader({
-    uploadPath: path.join(__dirname, '../', process.env.MENU_ICON_IMAGE_PATH),
-    fieldName: 'icon',
-    maxCount: 1
-});
 
 
 const saveSubModuleMaster = async (req, res) => {
-    //Handle File Upload 
-    uploadCustomer(req, res, async function (err) {
-        if (err) {
-            return res.status(400).send({ success: false, message: err.message });
-        }
-
-        if (!req.file) {
-            return res.status(400).send({ success: false, message: "No File found to upload" });
-        }
-
         const loggedInUser = req.session.user;
         if (!loggedInUser) {
             return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
@@ -34,8 +17,7 @@ const saveSubModuleMaster = async (req, res) => {
             menuRank: Joi.number().required(),
         });
 
-        const filePath = `${process.env.MENU_ICON_IMAGE_PATH}/${req.file.filename}`;
-        const result = Schema.validate({ ...req.body, icon: filePath });
+        const result = Schema.validate({...req.body});
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
         }
@@ -44,20 +26,9 @@ const saveSubModuleMaster = async (req, res) => {
 
         let response = await submodulemaster.save();
         return res.status(201).json({ success: true, message: "SubModuleMaster Saved Successfully !!" });
-    });
 }
 
 const updateSubModuleMaster = async (req, res) => {
-    //Handle File Upload 
-    uploadCustomer(req, res, async function (err) {
-        if (err) {
-            return res.status(400).send({ success: false, message: err.message });
-        }
-
-        if (!req.file) {
-            return res.status(400).send({ success: false, message: "No File found to upload" });
-        }
-
         const loggedInUser = req.session.user;
         if (!loggedInUser) {
             return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
@@ -71,9 +42,7 @@ const updateSubModuleMaster = async (req, res) => {
             defaultActive: Joi.boolean().required(),
             menuRank: Joi.number().required(),
         });
-
-        const filePath = `${process.env.MENU_ICON_IMAGE_PATH}/${req.file.filename}`;
-        const result = Schema.validate({ ...req.body, icon: filePath });
+        const result = Schema.validate({...req.body});
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
         }
@@ -85,7 +54,6 @@ const updateSubModuleMaster = async (req, res) => {
         } else {
             return res.status(201).json({ success: true, message: "SubModuleMaster Updated Successfully !!" });
         }
-    });
 }
 
 const getAllSubModuleMasters = async (req, res) => {

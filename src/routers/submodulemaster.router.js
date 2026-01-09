@@ -36,7 +36,7 @@ const { saveSubModuleMaster, updateSubModuleMaster, getAllSubModuleMasters, getS
  *               name:
  *                 type: string
  *               icon:
- *                 type: file
+ *                 type: string
  *               defaultActive:
  *                 type: boolean
  *               menuRank:
@@ -80,7 +80,7 @@ submodulemasterRouter.post('/Save', adminAuthMiddleware, saveSubModuleMaster);
  *               name:
  *                 type: string
  *               icon:
- *                type: file
+ *                type: string
  *               defaultActive:
  *                type: boolean
  *               menuRank:

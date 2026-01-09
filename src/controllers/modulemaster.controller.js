@@ -1,26 +1,8 @@
 const ModuleMaster = require('../models/modulemaster.model');
 const Joi = require('joi');
 const path = require('path');
-const { createUploader } = require('../utils/uploader/createuploader');
-
-const uploadCustomer = createUploader({
-    uploadPath: path.join(__dirname, '../', process.env.MENU_ICON_IMAGE_PATH),
-    fieldName: 'icon',
-    maxCount: 1
-});
-
 
 const saveModuleMaster = async (req, res) => {
-    //Handle File Upload 
-    uploadCustomer(req, res, async function (err) {
-        if (err) {
-            return res.status(400).send({ success: false, message: err.message });
-        }
-
-        if (!req.file) {
-            return res.status(400).send({ success: false, message: "No File found to upload" });
-        }
-
         const loggedInUser = req.session.user;
         if (!loggedInUser) {
             return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
@@ -32,9 +14,7 @@ const saveModuleMaster = async (req, res) => {
             defaultActive: Joi.boolean().required(),
             menuRank: Joi.number().required(),
         });
-
-        const filePath = `${process.env.MENU_ICON_IMAGE_PATH}/${req.file.filename}`;
-        const result = Schema.validate({ ...req.body, icon: filePath });
+        const result = Schema.validate({...req.body});
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
         }
@@ -43,20 +23,9 @@ const saveModuleMaster = async (req, res) => {
 
         let response = await modulemaster.save();
         return res.status(201).json({ success: true, message: "ModuleMaster Saved Successfully !!" });
-    });
 }
 
 const updateModuleMaster = async (req, res) => {
-    //Handle File Upload 
-    uploadCustomer(req, res, async function (err) {
-        if (err) {
-            return res.status(400).send({ success: false, message: err.message });
-        }
-
-        if (!req.file) {
-            return res.status(400).send({ success: false, message: "No File found to upload" });
-        }
-
         const loggedInUser = req.session.user;
         if (!loggedInUser) {
             return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
@@ -70,8 +39,7 @@ const updateModuleMaster = async (req, res) => {
             menuRank: Joi.number().required(),
         });
 
-        const filePath = `${process.env.MENU_ICON_IMAGE_PATH}/${req.file.filename}`;
-        const result = Schema.validate({ ...req.body, icon: filePath });
+        const result = Schema.validate({...req.body});
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
         }
@@ -83,7 +51,6 @@ const updateModuleMaster = async (req, res) => {
         } else {
             return res.status(201).json({ success: true, message: "ModuleMaster Updated Successfully !!" });
         }
-    });
 }
 
 const getAllModuleMasters = async (req, res) => {

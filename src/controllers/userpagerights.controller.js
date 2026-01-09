@@ -4,6 +4,7 @@ const Joi = require('joi');
 const ModuleMaster = require('../models/modulemaster.model');
 const SubModuleMaster = require('../models/submodulemaster.model');
 const PageMaster = require('../models/pagemaster.model');
+const User = require('../models/user.model')
 
 const saveUserPageRights = async (req, res) => {
     const loggedInUser = req.session.user;
@@ -33,9 +34,9 @@ const saveUserPageRights = async (req, res) => {
     let isExistsRights = await UserPageRights.find({ userId, moduleId, subModuleId, isActive: true });
 
     if (isExistsRights.length === 0) {
-        for(let pageId of pageIdsArray) {
-        const userpagerights = new UserPageRights({ userId, moduleId, subModuleId, pageIds: pageId, createdBy: loggedInUser.id });
-        await userpagerights.save();
+        for (let pageId of pageIdsArray) {
+            const userpagerights = new UserPageRights({ userId, moduleId, subModuleId, pageIds: pageId, createdBy: loggedInUser.id });
+            await userpagerights.save();
         }
         return res.status(201).json({ success: true, message: "Rights Saved Successfully !!" });
     } else {
@@ -185,7 +186,7 @@ const getPageRightsByUserAndModule = async (req, res) => {
     const { userId, moduleId } = result.value;
 
     const userRights = await UserPageRights.find({ userId, moduleId, isActive: true })
-       .populate({ path: 'userId', select: 'firstName lastName email' })
+        .populate({ path: 'userId', select: 'firstName lastName email' })
         .populate({ path: 'moduleId', select: 'name icon defaultActive menuRank' })
         .populate({ path: 'subModuleId', select: 'name icon defaultActive menuRank' })
         .populate({ path: 'pageIds', select: 'name url icon defaultActive menuRank' })
@@ -200,29 +201,33 @@ const getPageRightsByUserAndModule = async (req, res) => {
 
 const getPageRightsByUser = async (req, res) => {
     const Schema = Joi.object({
-        userId: Joi.string().required()
+        email: Joi.string().required()
     });
-
     const result = Schema.validate(req.body);
     if (result.error) {
         return res.status(400).send({ error: result.error.details[0].message });
     }
 
-    const { userId } = result.value;
+    const { email } = result.value;
 
-    const userRights = await UserPageRights.find({ userId, isActive: true })
-     .populate({ path: 'userId', select: 'firstName lastName email' })
-        .populate({ path: 'moduleId', select: 'name icon defaultActive menuRank' })
-        .populate({ path: 'subModuleId', select: 'name icon defaultActive menuRank' })
-        .populate({ path: 'pageIds', select: 'name url icon defaultActive menuRank' })
-        .populate({ path: 'createdBy', select: 'firstName lastName email' })
-        .populate({ path: 'updatedBy', select: 'firstName lastName email' });
-    if (userRights.length > 0) {
-        res.status(200).json({ success: true, data: userRights });
-    } else {
-        res.status(200).json({ data: [], message: 'No Data found' })
+    const user = await User.findOne({ email, isActive: true });
+    
+    if (!user) {
+        return res.status(400).json({ success: false, message: 'No Data found' })
+    } {
+        const userRights = await UserPageRights.find({ userId: user._id, isActive: true })
+            .populate({ path: 'userId', select: 'firstName lastName email' })
+            .populate({ path: 'moduleId', select: 'name icon defaultActive menuRank' })
+            .populate({ path: 'subModuleId', select: 'name icon defaultActive menuRank' })
+            .populate({ path: 'pageIds', select: 'name url icon defaultActive menuRank' })
+            .populate({ path: 'createdBy', select: 'firstName lastName email' })
+            .populate({ path: 'updatedBy', select: 'firstName lastName email' });
+        if (userRights.length > 0) {
+            res.status(200).json({ success: true, data: userRights });
+        } else {
+            res.status(400).json({ data: [], message: 'No Data found' })
+        }
     }
-
 }
 
 
@@ -282,4 +287,4 @@ const updateMenuConfig = async (req, res) => {
 
     res.status(200).json({ message: 'Menu Configuration Updated SuccessfullY !!' })
 }
-module.exports = { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser , updateMenuConfig };
+module.exports = { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser, updateMenuConfig };

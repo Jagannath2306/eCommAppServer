@@ -107,7 +107,7 @@ userpagerightsRouter.post('/GetById', adminAuthMiddleware, getUserPageRightsById
     * @swagger
     * /api/UserPageRights/GetByUserId:
     *   post:
-    *     summary: Get UserPageRights by Id
+    *     summary: Get UserPageRights User Email
     *     tags: [UserPageRights]
     *     requestBody:
     *       required: true

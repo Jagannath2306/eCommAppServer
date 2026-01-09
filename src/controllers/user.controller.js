@@ -9,7 +9,7 @@ const redisClient = require("../utils/radis.js");
 function validateUser(user) {
     const schema = Joi.object({
         firstName: Joi.string().min(2).max(20).required(),
-        lastName: Joi.string(),
+        lastName: Joi.string().min(2).max(20),
         email: Joi.string().email().required(),
         userTypeId: Joi.string().required(),
         password: Joi.string().required()
@@ -50,7 +50,7 @@ const addUser = async (req, res) => {
                         <h3>Click <a href='http://localhost:4200/user'>here</a> to Login</h3>
                          <br/><br/><h5> We are happy to see you with us.</h5><h5> Team BaggageApp</h5>`
         });
-        res.status(201).json({ success: true, data: user });
+        res.status(201).json({ success: true, data: user ,message:'User Registered Successfully'});
     } else {
         return res.send({ success: false, message: "Email Id already exists !!" });
     }
@@ -58,7 +58,6 @@ const addUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const result = validateLoginUser(req.body);
-    console.log(req.body)
     if (result.error) {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
@@ -239,8 +238,8 @@ const resetUserPassword = async (req, res) => {
     const Schema = Joi.object({
         resetToken: Joi.string().required(),
         otp: Joi.string().length(6).pattern(/^[0-9]+$/).required(),
-        newPassword: Joi.string().required(),
-        confirmPassword: Joi.string().required()
+        newPassword: Joi.string().pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/).required(),
+        confirmPassword: Joi.string().pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/).required()
     });
 
     const result = Schema.validate(req.body);
@@ -291,7 +290,7 @@ const resetUserPassword = async (req, res) => {
         await redisClient.del(`reset-otp-count:${resetToken}`);
         await redisClient.del(`reset-otp-cooldown:${resetToken}`);
 
-        res.status(200).json({ success: true, message: "Password Reset Successfully !!" });
+        res.status(200).json({ success: true, message: "Password Reset Successfully" });
     }
 }
 
@@ -315,7 +314,7 @@ const resendUserOtp = async (req, res) => {
     if (!email) {
         return res.status(400).json({
             success: false,
-            message: "Invalid or expired reset session"
+            message: "Invalid or Expired Reset Session"
         });
     }
 
@@ -335,7 +334,7 @@ const resendUserOtp = async (req, res) => {
     if (resendCount >= 3) {
         return res.status(429).json({
             success: false,
-            message: "OTP resend limit reached"
+            message: "OTP Resend Limit Reached"
         });
     }
 
@@ -376,7 +375,7 @@ const resendUserOtp = async (req, res) => {
     });
     return res.status(200).json({
         success: true,
-        message: "OTP resent successfully"
+        message: "OTP Sent to your email ID"
     });
 }
 
