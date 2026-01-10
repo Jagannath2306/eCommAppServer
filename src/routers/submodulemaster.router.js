@@ -21,26 +21,9 @@ const { saveSubModuleMaster, updateSubModuleMaster, getAllSubModuleMasters, getS
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
- *             type: object
- *             required:
- *                - moduleId
- *                - name
- *                - icon
- *                - defaultActive
- *                - menuRank
- *             properties:
- *               moduleId:
- *                 type: string
- *               name:
- *                 type: string
- *               icon:
- *                 type: string
- *               defaultActive:
- *                 type: boolean
- *               menuRank:
- *                 type: number
+ *             $ref: '#/components/schemas/SaveSubModuleMaster'
  *     responses:
  *       201:
  *         description: SubModuleMaster saved successfully
@@ -51,8 +34,6 @@ const { saveSubModuleMaster, updateSubModuleMaster, getAllSubModuleMasters, getS
  */
 submodulemasterRouter.post('/Save', adminAuthMiddleware, saveSubModuleMaster);
 
-
-
 /**
  * @swagger
  * /api/SubModuleMaster/Update:
@@ -62,29 +43,9 @@ submodulemasterRouter.post('/Save', adminAuthMiddleware, saveSubModuleMaster);
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - id
- *               - moduleId
- *               - name
- *               - icon
- *               - defaultActive
- *               - menuRank
- *             properties:
- *               id:
- *                 type: string
- *               moduleId:
- *                 type: string
- *               name:
- *                 type: string
- *               icon:
- *                type: string
- *               defaultActive:
- *                type: boolean
- *               menuRank:
- *                 type: number
+ *             $ref: '#/components/schemas/UpdateSubModuleMaster'
  *     responses:
  *       201:
  *         description: SubModuleMaster updated successfully
@@ -94,6 +55,7 @@ submodulemasterRouter.post('/Save', adminAuthMiddleware, saveSubModuleMaster);
  *         description: Unauthorized
  */
 submodulemasterRouter.post('/Update', adminAuthMiddleware, updateSubModuleMaster);
+
 
 /**
   * @swagger

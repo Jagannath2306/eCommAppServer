@@ -3,18 +3,19 @@ const Joi = require('joi');
 const path = require('path');
 
 const saveModuleMaster = async (req, res) => {
+    console.log(req.body)
         const loggedInUser = req.session.user;
         if (!loggedInUser) {
             return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
         }
-
         const Schema = Joi.object({
             name: Joi.string().min(2).max(20).required(),
             icon: Joi.string().required(),
+            url: Joi.string().required(),
             defaultActive: Joi.boolean().required(),
             menuRank: Joi.number().required(),
         });
-        const result = Schema.validate({...req.body});
+        const result = Schema.validate(req.body);
         if (result.error) {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
         }
@@ -35,6 +36,7 @@ const updateModuleMaster = async (req, res) => {
             id: Joi.string().required(),
             name: Joi.string().min(2).max(20).required(),
             icon: Joi.string().required(),
+            url: Joi.string().required(),
             defaultActive: Joi.boolean().required(),
             menuRank: Joi.number().required(),
         });

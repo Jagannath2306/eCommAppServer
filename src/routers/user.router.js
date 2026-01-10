@@ -1,7 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const { adminAuthMiddleware, userAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp } = require('../controllers/user.controller');
+const { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp, getAllUsersUnlimited } = require('../controllers/user.controller');
 
 
 
@@ -68,11 +68,12 @@ userRouter.post('/Login', loginUser);
   */
 
 userRouter.post('/UpdateProfile', userAuthMiddleware, updateProfile);
+
 /**
   * @swagger
   * /api/User/GetAllUsers:
   *   post:
-  *     summary: Get All User 
+  *     summary: Get All User with pagination
   *     tags: [User]
   *     requestBody:
   *       required: true
@@ -91,6 +92,25 @@ userRouter.post('/UpdateProfile', userAuthMiddleware, updateProfile);
   *                 type: object
   */
 userRouter.post('/GetAllUsers', adminAuthMiddleware, getAllUsers);
+
+/**
+ * @swagger
+ * /api/User/GetAllUsersUnlimited:
+ *   get:
+ *     summary: Get All Users without pagination
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+userRouter.get('/GetAllUsersUnlimited', adminAuthMiddleware, getAllUsersUnlimited);
+
 
 /**
   * @swagger

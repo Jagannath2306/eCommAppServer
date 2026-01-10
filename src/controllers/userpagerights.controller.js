@@ -12,7 +12,6 @@ const saveUserPageRights = async (req, res) => {
     if (!loggedInUser) {
         return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
     }
-    console.log("req.body", req.body);
     const Schema = Joi.object({
         userId: Joi.string().required(),
         moduleId: Joi.string().required(),
@@ -217,8 +216,8 @@ const getPageRightsByUser = async (req, res) => {
     } {
         const userRights = await UserPageRights.find({ userId: user._id, isActive: true })
             .populate({ path: 'userId', select: 'firstName lastName email' })
-            .populate({ path: 'moduleId', select: 'name icon defaultActive menuRank' })
-            .populate({ path: 'subModuleId', select: 'name icon defaultActive menuRank' })
+            .populate({ path: 'moduleId', select: 'name icon defaultActive menuRank url' })
+            .populate({ path: 'subModuleId', select: 'name icon defaultActive menuRank url' })
             .populate({ path: 'pageIds', select: 'name url icon defaultActive menuRank' })
             .populate({ path: 'createdBy', select: 'firstName lastName email' })
             .populate({ path: 'updatedBy', select: 'firstName lastName email' });
@@ -230,6 +229,33 @@ const getPageRightsByUser = async (req, res) => {
     }
 }
 
+const getMenusByUser = async (req, res) => {
+    const Schema = Joi.object({
+        email: Joi.string().required()
+    });
+    const result = Schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ error: result.error.details[0].message });
+    }
+
+    const { email } = result.value;
+
+    const user = await User.findOne({ email, isActive: true });
+    
+    if (!user) {
+        return res.status(400).json({ success: false, message: 'No Data found' })
+    } {
+        const userRights = await UserPageRights.find({ userId: user._id, isActive: true })
+            .populate({ path: 'moduleId', select: 'name icon defaultActive menuRank url' })
+            .populate({ path: 'subModuleId', select: 'name icon defaultActive menuRank url' })
+            .populate({ path: 'pageIds', select: 'name icon defaultActive menuRank url' })
+        if (userRights.length > 0) {
+            res.status(200).json({ success: true, data: userRights });
+        } else {
+            res.status(400).json({ data: [], message: 'No Data found' })
+        }
+    }
+}
 
 //'67acc45b6cfb92d061042d9c:1;67acca6a4e64854c9c3bf353:2;67af654d94c2dfab1714c158:3'
 const fun_split_string_to_columns = (str) => {
@@ -287,4 +313,4 @@ const updateMenuConfig = async (req, res) => {
 
     res.status(200).json({ message: 'Menu Configuration Updated SuccessfullY !!' })
 }
-module.exports = { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser, updateMenuConfig };
+module.exports = { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser, updateMenuConfig,getMenusByUser };

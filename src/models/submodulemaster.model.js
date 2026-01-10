@@ -22,6 +22,10 @@ const SubModuleMasterSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    url: {
+        type: String,
+        required: [true, 'Icon is Required !!']
+    },
     isActive: {
         type: Boolean,
         default: true

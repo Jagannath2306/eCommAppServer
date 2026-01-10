@@ -1,7 +1,7 @@
 module.exports = {
     components: {
         schemas: {
-             InsertUserPageRights: {
+            InsertUserPageRights: {
                 type: "object",
                 required: ['userId', 'moduleId', 'subModuleId', 'pageIds'],
                 properties: {
@@ -64,9 +64,16 @@ module.exports = {
                     email: { type: "string" }
                 }
             },
+            GetMenusByUser: {
+                type: "object",
+                required: ['email'],
+                properties: {
+                    email: { type: "string" }
+                }
+            },
             UpdateMenuConfig: {
                 type: "object",
-                required: ['moduleIds' , 'subModuleIds' , 'pageIds'],
+                required: ['moduleIds', 'subModuleIds', 'pageIds'],
                 properties: {
                     moduleIds: { type: "string" },
                     subModuleIds: { type: "string" },

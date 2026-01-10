@@ -21,23 +21,9 @@ const { saveModuleMaster, updateModuleMaster, getAllModuleMasters, getModuleMast
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - icon
- *               - defaultActive
- *               - menuRank
- *             properties:
- *               name:
- *                 type: string
- *               icon:
- *                 type: string
- *               defaultActive:
- *                 type: boolean
- *               menuRank:
- *                 type: number
+ *             $ref: '#/components/schemas/SaveModuleMaster'
  *     responses:
  *       201:
  *         description: ModuleMaster saved successfully
@@ -49,7 +35,6 @@ const { saveModuleMaster, updateModuleMaster, getAllModuleMasters, getModuleMast
 modulemasterRouter.post('/Save', adminAuthMiddleware, saveModuleMaster);
 
 
-
 /**
  * @swagger
  * /api/ModuleMaster/Update:
@@ -59,26 +44,9 @@ modulemasterRouter.post('/Save', adminAuthMiddleware, saveModuleMaster);
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - id
- *               - name
- *               - icon
- *               - defaultActive
- *               - menuRank
- *             properties:
- *               id:
- *                 type: string
- *               name:
- *                 type: string
- *               icon:
- *                type: string
- *               defaultActive:
- *                type: boolean
- *               menuRank:
- *                 type: number
+ *             $ref: '#/components/schemas/UpdateModuleMaster'
  *     responses:
  *       201:
  *         description: ModuleMaster updated successfully
@@ -88,6 +56,7 @@ modulemasterRouter.post('/Save', adminAuthMiddleware, saveModuleMaster);
  *         description: Unauthorized
  */
 modulemasterRouter.post('/Update', adminAuthMiddleware, updateModuleMaster);
+
 
 /**
   * @swagger

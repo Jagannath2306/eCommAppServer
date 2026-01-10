@@ -33,7 +33,6 @@ module.exports = {
                     lastName: { type: "string" }
                 },
             },
-
             GetAllUser: {
                 type: "object",
                 required: ['pageSize', 'page', "sortCol", "sort"],

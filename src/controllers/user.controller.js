@@ -50,7 +50,7 @@ const addUser = async (req, res) => {
                         <h3>Click <a href='http://localhost:4200/user'>here</a> to Login</h3>
                          <br/><br/><h5> We are happy to see you with us.</h5><h5> Team BaggageApp</h5>`
         });
-        res.status(201).json({ success: true, data: user ,message:'User Registered Successfully'});
+        res.status(201).json({ success: true, data: user, message: 'User Registered Successfully' });
     } else {
         return res.send({ success: false, message: "Email Id already exists !!" });
     }
@@ -159,6 +159,119 @@ const getAllUsers = async (req, res) => {
         }
     });
 }
+
+
+const getAllUsersUnlimited = async (req, res) => {
+    try {
+        const users = await User.aggregate([
+            // 1. Filter only active users
+            { $match: { isActive: true } },
+
+            // 2. Lookup Role (UserTypes Collection)
+            {
+                $lookup: {
+                    from: 'usertypes',
+                    let: { roleId: '$userTypeId' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        // Ensures String IDs match ObjectId in DB
+                                        { $eq: ['$_id', { $toObjectId: '$$roleId' }] },
+                                        { $eq: ['$isActive', true] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $project: { _id: 0, name: 1 } }
+                    ],
+                    as: 'roleData'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$roleData',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+
+            // 3. Lookup Updater (UserMasters Collection)
+            {
+                $lookup: {
+                    from: 'usermasters',
+                    let: { upId: '$updatedBy' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { 
+                                    $eq: ['$_id', { $toObjectId: '$$upId' }] 
+                                }
+                            }
+                        },
+                        { $project: { firstName: 1, lastName: 1, _id: 0 } }
+                    ],
+                    as: 'updatedUserData'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$updatedUserData',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+
+            // 4. Final Projection with Name Concatenation
+            {
+                $project: {
+                    _id: 1,
+                    firstName: 1,
+                    lastName: 1,
+                    email: 1,
+                    isActive: 1,
+                    createdOn: 1,
+                    role: { $ifNull: ['$roleData.name', 'No Role'] },
+                    
+                    // Combine First and Last name into one field
+                    updatedBy: {
+                        $cond: {
+                            if: { $gt: [{ $type: "$updatedUserData" }, "missing"] },
+                            then: {
+                                $trim: { // Trims extra spaces if one name is missing
+                                    input: {
+                                        $concat: [
+                                            { $ifNull: ['$updatedUserData.firstName', ''] },
+                                            ' ',
+                                            { $ifNull: ['$updatedUserData.lastName', ''] }
+                                        ]
+                                    }
+                                }
+                            },
+                            else: 'System' // Default if no updater found
+                        }
+                    }
+                }
+            },
+
+            // 5. Sort by most recent
+            { $sort: { createdOn: -1 } }
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Users fetched successfully',
+            data: users
+        });
+
+    } catch (error) {
+        console.error("Aggregation Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error: " + error.message
+        });
+    }
+};
+
 
 const deleteUserById = async (req, res) => {
     const loggedInUser = req.session.user;
@@ -379,5 +492,5 @@ const resendUserOtp = async (req, res) => {
     });
 }
 
-module.exports = { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp }
+module.exports = { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp, getAllUsersUnlimited }
 

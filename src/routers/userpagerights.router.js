@@ -1,7 +1,7 @@
 const express = require('express');
 const userpagerightsRouter = express.Router();
 const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser , updateMenuConfig } = require('../controllers/userpagerights.controller');
+const { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser , updateMenuConfig, getMenusByUser } = require('../controllers/userpagerights.controller');
 
 
 /**
@@ -138,5 +138,24 @@ userpagerightsRouter.post('/GetById', adminAuthMiddleware, getUserPageRightsById
     *         description: UserPageRights fetched successfully.
     */
   userpagerightsRouter.post('/UpdateMenuConfig', adminAuthMiddleware, updateMenuConfig);
+
+
+  /**
+    * @swagger
+    * /api/UserPageRights/GetMenusByUser:
+    *   post:
+    *     summary: Get Menus By User
+    *     tags: [UserPageRights]
+    *     requestBody:
+    *       required: true
+    *       content:
+    *         application/json:
+    *           schema:
+    *             $ref: '#/components/schemas/GetMenusByUser'
+    *     responses:
+    *       200:
+    *         description: UserPageRights fetched successfully.
+    */
+  userpagerightsRouter.post('/GetMenusByUser', adminAuthMiddleware, getMenusByUser);
 
 module.exports = userpagerightsRouter;

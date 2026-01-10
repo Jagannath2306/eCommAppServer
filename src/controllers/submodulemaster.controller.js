@@ -13,6 +13,7 @@ const saveSubModuleMaster = async (req, res) => {
             moduleId: Joi.string().required(),
             name: Joi.string().min(2).max(20).required(),
             icon: Joi.string().required(),
+            url: Joi.string().required(),
             defaultActive: Joi.boolean().required(),
             menuRank: Joi.number().required(),
         });
@@ -39,6 +40,7 @@ const updateSubModuleMaster = async (req, res) => {
             moduleId: Joi.string().required(),
             name: Joi.string().min(2).max(20).required(),
             icon: Joi.string().required(),
+            url: Joi.string().required(),
             defaultActive: Joi.boolean().required(),
             menuRank: Joi.number().required(),
         });
