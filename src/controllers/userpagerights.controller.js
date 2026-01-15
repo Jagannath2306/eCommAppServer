@@ -4,8 +4,9 @@ const Joi = require('joi');
 const ModuleMaster = require('../models/modulemaster.model');
 const SubModuleMaster = require('../models/submodulemaster.model');
 const PageMaster = require('../models/pagemaster.model');
-const User = require('../models/user.model')
-
+const User = require('../models/user.model');
+const {buildMenuTree} = require('../utils/buildMenus');
+const RolePagePermission = require('../models/rolepagepermission.modal');
 const saveUserPageRights = async (req, res) => {
     const loggedInUser = req.session.user;
 
@@ -210,7 +211,7 @@ const getPageRightsByUser = async (req, res) => {
     const { email } = result.value;
 
     const user = await User.findOne({ email, isActive: true });
-    
+
     if (!user) {
         return res.status(400).json({ success: false, message: 'No Data found' })
     } {
@@ -241,7 +242,7 @@ const getMenusByUser = async (req, res) => {
     const { email } = result.value;
 
     const user = await User.findOne({ email, isActive: true });
-    
+
     if (!user) {
         return res.status(400).json({ success: false, message: 'No Data found' })
     } {
@@ -256,6 +257,45 @@ const getMenusByUser = async (req, res) => {
         }
     }
 }
+
+const getSidebarMenu = async (req, res) => {
+    try {
+        const { userTypeId, userTypeName } = req.session.user;
+
+        // 🔓 Super Admin sees everything
+        if (userTypeName === 'superAdmin') {
+            const pages = await PageMaster.find({ isActive: true })
+                .populate('moduleId', 'name url icon menuRank')
+                .populate('subModuleId', 'name url icon menuRank')
+                .sort({ menuRank: 1 });
+
+            return res.json(buildSidebar(pages));
+        }
+
+        // 🔐 Other roles – only pages with VIEW permission
+        const permissions = await RolePagePermission.find({
+            userTypeId,
+            isActive: true,
+            actions: 'view'
+        }).populate({
+            path: 'pageId',
+            match: { isActive: true },
+            populate: [
+                { path: 'moduleId', select: 'name url icon menuRank' },
+                { path: 'subModuleId', select: 'name url icon menuRank' }
+            ]
+        });
+
+        const pages = permissions
+            .map(p => p.pageId)
+            .filter(Boolean);
+        return res.json({success:true,data:buildMenuTree(pages),message:"Menus fetched successfully"});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to load sidebar' });
+    }
+}
+
 
 //'67acc45b6cfb92d061042d9c:1;67acca6a4e64854c9c3bf353:2;67af654d94c2dfab1714c158:3'
 const fun_split_string_to_columns = (str) => {
@@ -313,4 +353,4 @@ const updateMenuConfig = async (req, res) => {
 
     res.status(200).json({ message: 'Menu Configuration Updated SuccessfullY !!' })
 }
-module.exports = { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser, updateMenuConfig,getMenusByUser };
+module.exports = { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser, updateMenuConfig, getMenusByUser, getSidebarMenu };

@@ -36,6 +36,8 @@ const options = {
         "./src/routers/paymentstatus.router.js",
         "./src/routers/orderstatus.router.js",
         "./src/routers/payment.router.js",
+        "./src/routers/pagepermissionmaster.router.js",
+        "./src/routers/rolepagepermission.router.js",
     ]
 }
 module.exports = options;

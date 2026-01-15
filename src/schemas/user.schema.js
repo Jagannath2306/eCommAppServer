@@ -27,10 +27,12 @@ module.exports = {
 
             UpdateProfile: {
                 type: "object",
-                required: ["firstName", "lastName"],
+                required: ["firstName", "lastName","userTypeId","id"],
                 properties: {
+                    id: { type: "string" },
                     firstName: { type: "string" },
-                    lastName: { type: "string" }
+                    lastName: { type: "string" },
+                    userTypeId: { type: "string" }
                 },
             },
             GetAllUser: {

@@ -15,6 +15,12 @@ const PageMasterSchema = mongoose.Schema({
         type: String,
         required: [true, 'Name is Required !!']
     },
+    code: {                         // 🔑 IMPORTANT
+        type: String,
+        required: [true, 'Name is Required !!'],
+        unique: true,
+        uppercase: true
+    },
     url: {
         type: String,
         required: [true, 'URL is Required !!']
@@ -44,7 +50,7 @@ const PageMasterSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'usermaster'
     }
-}, {    
+}, {
     // timestamps: true
     timestamps: {
         createdAt: 'createdOn',

@@ -1,7 +1,8 @@
 const express = require('express');
 const userRouter = express.Router();
-const { adminAuthMiddleware, userAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp, getAllUsersUnlimited } = require('../controllers/user.controller');
+const { adminAuthMiddleware, userAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
+const { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp, getUsers } = require('../controllers/user.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 
@@ -31,7 +32,7 @@ const { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserB
   *       201:
   *         description: User registered successfully
   */
-userRouter.post('/Register', addUser);
+userRouter.post('/Register', authMiddleware, checkPermission('USER_LIST', 'create'), addUser);
 /**
   * @swagger
   * /api/User/Login:
@@ -67,7 +68,7 @@ userRouter.post('/Login', loginUser);
   *         description: Profile updated successfully
   */
 
-userRouter.post('/UpdateProfile', userAuthMiddleware, updateProfile);
+userRouter.post('/UpdateProfile', authMiddleware, checkPermission('USER_LIST', 'edit'), updateProfile);
 
 /**
   * @swagger
@@ -91,11 +92,11 @@ userRouter.post('/UpdateProfile', userAuthMiddleware, updateProfile);
   *               items:
   *                 type: object
   */
-userRouter.post('/GetAllUsers', adminAuthMiddleware, getAllUsers);
+userRouter.post('/GetAllUsers', authMiddleware, checkPermission('USER_LIST', 'view'), getAllUsers);
 
 /**
  * @swagger
- * /api/User/GetAllUsersUnlimited:
+ * /api/User/GetUsers:
  *   get:
  *     summary: Get All Users without pagination
  *     tags: [User]
@@ -109,46 +110,54 @@ userRouter.post('/GetAllUsers', adminAuthMiddleware, getAllUsers);
  *               items:
  *                 type: object
  */
-userRouter.get('/GetAllUsersUnlimited', adminAuthMiddleware, getAllUsersUnlimited);
-
-
-/**
-  * @swagger
-  * /api/User/GetUserById/{id}:
-  *   get:
-  *     summary: Get user by Id
-  *     tags: [User]
-  *     parameters:
-  *       - in: path
-  *         name: id
-  *         required: true
-  *         description: User Id
-  *         schema:
-  *           type: string
-  *     responses:
-  *       200:
-  *         description: Returns User object.
-  */
-userRouter.get('/GetUserById/:id', userAuthMiddleware, getUserById);
+userRouter.get('/GetUsers', authMiddleware, checkPermission('USER_LIST', 'view'), getUsers);
 
 /**
-  * @swagger
-  * /api/User/DeteteUserById/{id}:
-  *   put:
-  *     summary: Delete user by ID
-  *     tags: [User]
-  *     parameters:
-  *       - in: path
-  *         name: id
-  *         required: true
-  *         description: User ID
-  *         schema:
-  *           type: string
-  *     responses:
-  *       200:
-  *         description: User deleted successfully
-  */
-userRouter.put('/DeteteUserById/:id', adminAuthMiddleware, deleteUserById);
+ * @swagger
+ * /api/User/GetUserById:
+ *   post:
+ *     summary: Get user by Id
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: User Id
+ *     responses:
+ *       200:
+ *         description: Returns User object.
+ */
+userRouter.post('/GetUserById', authMiddleware, checkPermission('USER_LIST', 'view'), getUserById);
+
+/**
+ * @swagger
+ * /api/User/DeteteUserById:
+ *   put:
+ *     summary: Delete user by ID
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ */
+userRouter.put('/DeteteUserById', authMiddleware, checkPermission('USER_LIST', 'delete'), deleteUserById);
 
 /**
   * @swagger
@@ -167,7 +176,7 @@ userRouter.put('/DeteteUserById/:id', adminAuthMiddleware, deleteUserById);
   *       200:
   *         description: User updated successfully
   */
-userRouter.put('/UpdateUserById/:id', adminAuthMiddleware, updateUserById);
+userRouter.put('/UpdateUserById/:id', authMiddleware, checkPermission('USER_LIST', 'edit'), updateUserById);
 
 
 /**

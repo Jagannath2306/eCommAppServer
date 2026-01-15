@@ -10,7 +10,7 @@ const saveUserType = async (req, res) => {
 
     const result = Schema.validate(req.body);
     if (result.error) {
-        return res.status(400).send({success :false, message: result.error.details[0].message });
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
     const name = result.value.name;
@@ -21,7 +21,7 @@ const saveUserType = async (req, res) => {
         let result = await usertype.save();
         res.status(201).json({ success: true, data: result });
     } else {
-       return res.status(400).json({ success: false, message: `UserType Name ${name} already exists !!` });
+        return res.status(400).json({ success: false, message: `UserType Name ${name} already exists !!` });
     }
 }
 
@@ -48,7 +48,7 @@ const updateUserType = async (req, res) => {
         await UserType.findOneAndUpdate({ _id: userTypeId }, { name: name, updatedBy: loggedInUser.id });
         res.status(201).json({ success: true, message: "UserType Updated Successfully !!" });
     } else {
-       return res.status(400).json({ success: false, message: `UserType Name ${name} already exists !!` });
+        return res.status(400).json({ success: false, message: `UserType Name ${name} already exists !!` });
     }
 }
 
@@ -72,7 +72,7 @@ const deleteUserType = async (req, res) => {
         await UserType.findOneAndUpdate({ _id: userTypeId }, { isActive: false, updatedBy: loggedInUser.id });
         res.status(201).json({ success: true, message: "UserType Deleted Successfully !!" });
     } else {
-       return res.status(402).json({ success: false, message: `Record not found to delete !!` });
+        return res.status(402).json({ success: false, message: `Record not found to delete !!` });
     }
 }
 
@@ -121,11 +121,22 @@ const getAllUserType = async (req, res) => {
         success: true,
         data: rows,
         meta: {
-            page : page,
-            pageSize : limitVal,
+            page: page,
+            pageSize: limitVal,
             total: count
         }
     });
 }
 
-module.exports = { saveUserType, updateUserType, deleteUserType, getUserTypeById, getAllUserType }
+const getUserTypes = async (req, res) => {
+    const userTypes = await UserType.find({ isActive: true }, { _id: 1, name: 1 })
+    let count = 0;
+    count = await UserType.countDocuments({ isActive: true });
+    return res.status(200).json({
+        success: true,
+        data: userTypes,
+        message:"User fetched successfully"
+    });
+}
+
+module.exports = { saveUserType, updateUserType, deleteUserType, getUserTypeById, getAllUserType,getUserTypes }

@@ -59,3 +59,7 @@ const UserPageRights = mongoose.model('userpagerights', UserPageRightsSchema);
 
 module.exports = UserPageRights;
 
+// Golden rule (remember this)
+
+// Menu visibility = view permission (PagePermissionMaster)
+// Page rights = action permissions (RolePagePermission)

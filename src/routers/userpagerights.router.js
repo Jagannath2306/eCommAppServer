@@ -1,7 +1,7 @@
 const express = require('express');
 const userpagerightsRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser , updateMenuConfig, getMenusByUser } = require('../controllers/userpagerights.controller');
+const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser , updateMenuConfig, getMenusByUser, getSidebarMenu } = require('../controllers/userpagerights.controller');
 
 
 /**
@@ -141,21 +141,26 @@ userpagerightsRouter.post('/GetById', adminAuthMiddleware, getUserPageRightsById
 
 
   /**
-    * @swagger
-    * /api/UserPageRights/GetMenusByUser:
-    *   post:
-    *     summary: Get Menus By User
-    *     tags: [UserPageRights]
-    *     requestBody:
-    *       required: true
-    *       content:
-    *         application/json:
-    *           schema:
-    *             $ref: '#/components/schemas/GetMenusByUser'
-    *     responses:
-    *       200:
-    *         description: UserPageRights fetched successfully.
-    */
-  userpagerightsRouter.post('/GetMenusByUser', adminAuthMiddleware, getMenusByUser);
+ * @swagger
+ * /api/UserPageRights/GetMenusByUser:
+ *   get:
+ *     summary: Get sidebar menus for logged-in user
+ *     tags: [UserPageRights]
+ *     responses:
+ *       200:
+ *         description: Sidebar menus fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+userpagerightsRouter.get('/GetMenusByUser', authMiddleware, getSidebarMenu);
+
 
 module.exports = userpagerightsRouter;

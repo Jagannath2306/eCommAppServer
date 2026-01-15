@@ -1,7 +1,7 @@
 const express = require('express');
 const userTypeRouter = express.Router();
 const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveUserType, updateUserType, deleteUserType, getUserTypeById, getAllUserType } = require('../controllers/usertype.controller');
+const { saveUserType, updateUserType, deleteUserType, getUserTypeById, getAllUserType ,getUserTypes} = require('../controllers/usertype.controller');
 
 
 /**
@@ -50,6 +50,7 @@ userTypeRouter.post('/Save', adminAuthMiddleware, saveUserType);
   *         description: User type updated successfully.
   */
 userTypeRouter.post('/Update', adminAuthMiddleware, updateUserType);
+
 /**
   * @swagger
   * /api/UserType/GetAll:
@@ -75,6 +76,24 @@ userTypeRouter.post('/Update', adminAuthMiddleware, updateUserType);
 userTypeRouter.post('/GetAll', adminAuthMiddleware, getAllUserType);
 
 /**
+ * @swagger
+ * /api/UserType/GetUserTypes:
+ *   get:
+ *     summary: Get All Users Types without pagination
+ *     tags: [UserType]
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+userTypeRouter.get('/GetUserTypes', adminAuthMiddleware, getUserTypes);
+
+/**
   * @swagger
   * /api/UserType/GetById/{id}:
   *   get:
@@ -92,6 +111,8 @@ userTypeRouter.post('/GetAll', adminAuthMiddleware, getAllUserType);
   *         description: Returns User type object.
   */
 userTypeRouter.get('/GetById/:id', adminAuthMiddleware, getUserTypeById);
+
+
 /**
   * @swagger
   * /api/UserType/Delete:

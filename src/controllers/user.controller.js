@@ -12,7 +12,8 @@ function validateUser(user) {
         lastName: Joi.string().min(2).max(20),
         email: Joi.string().email().required(),
         userTypeId: Joi.string().required(),
-        password: Joi.string().required()
+        password: Joi.string().required(),
+        confirmPassword: Joi.string().required()
     });
 
     const result = schema.validate(user);
@@ -29,6 +30,10 @@ function validateLoginUser(user) {
 }
 
 const addUser = async (req, res) => {
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
     const result = validateUser(req.body);
 
     if (result.error) {
@@ -36,11 +41,10 @@ const addUser = async (req, res) => {
     }
 
     const userData = result.value;
-    // We have to Check Password and Confirm Password Equality
 
     let isExist = await User.isExists(userData.email);
     if (!isExist) {
-        let user = await new User(userData).save();
+        let user = await new User({ ...userData, createdBy: loggedInUser.id }).save();
         await sendEmail({
             to: userData.email,
             subject: 'BaggageApp - Signup Successful',
@@ -88,16 +92,18 @@ const loginUser = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     const schema = Joi.object({
+        id: Joi.string().required(),
         firstName: Joi.string().min(2).max(20).required(),
         lastName: Joi.string(),
+        userTypeId: Joi.string()
     });
     const result = schema.validate(req.body);
     if (result.error) {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
-
+    const { firstName, lastName, userTypeId } = result.value;
     const loggedInUser = req.session.user;
-    await User.findOneAndUpdate({ _id: loggedInUser.id }, result.value);
+    await User.findOneAndUpdate({ _id: result.value.id }, { firstName, lastName, userTypeId, updatedBy: loggedInUser.id });
     return res.json({ success: true, message: "User Profile Updated Successfully !!" });
 }
 
@@ -161,7 +167,7 @@ const getAllUsers = async (req, res) => {
 }
 
 
-const getAllUsersUnlimited = async (req, res) => {
+const getUsers = async (req, res) => {
     try {
         const users = await User.aggregate([
             // 1. Filter only active users
@@ -200,23 +206,23 @@ const getAllUsersUnlimited = async (req, res) => {
             {
                 $lookup: {
                     from: 'usermasters',
-                    let: { upId: '$updatedBy' },
+                    let: { upId: '$createdBy' },
                     pipeline: [
                         {
                             $match: {
-                                $expr: { 
-                                    $eq: ['$_id', { $toObjectId: '$$upId' }] 
+                                $expr: {
+                                    $eq: ['$_id', { $toObjectId: '$$upId' }]
                                 }
                             }
                         },
                         { $project: { firstName: 1, lastName: 1, _id: 0 } }
                     ],
-                    as: 'updatedUserData'
+                    as: 'createdUserData'
                 }
             },
             {
                 $unwind: {
-                    path: '$updatedUserData',
+                    path: '$createdUserData',
                     preserveNullAndEmptyArrays: true
                 }
             },
@@ -231,18 +237,18 @@ const getAllUsersUnlimited = async (req, res) => {
                     isActive: 1,
                     createdOn: 1,
                     role: { $ifNull: ['$roleData.name', 'No Role'] },
-                    
+
                     // Combine First and Last name into one field
                     updatedBy: {
                         $cond: {
-                            if: { $gt: [{ $type: "$updatedUserData" }, "missing"] },
+                            if: { $gt: [{ $type: "$createdUserData" }, "missing"] },
                             then: {
                                 $trim: { // Trims extra spaces if one name is missing
                                     input: {
                                         $concat: [
-                                            { $ifNull: ['$updatedUserData.firstName', ''] },
+                                            { $ifNull: ['$createdUserData.firstName', ''] },
                                             ' ',
-                                            { $ifNull: ['$updatedUserData.lastName', ''] }
+                                            { $ifNull: ['$createdUserData.lastName', ''] }
                                         ]
                                     }
                                 }
@@ -275,23 +281,39 @@ const getAllUsersUnlimited = async (req, res) => {
 
 const deleteUserById = async (req, res) => {
     const loggedInUser = req.session.user;
-    let isExists = await User.findOne({ _id: req.params.id, isActive: true }, { name: 1 });
+    const schema = Joi.object({
+        id: Joi.string().required(),
+    });
+    const result = schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
+    let isExists = await User.findOne({ _id: result.value.id, isActive: true }, { name: 1 });
     if (isExists) {
-        await User.findOneAndUpdate({ _id: req.params.id, isActive: true }, { isActive: false, updatedBy: loggedInUser.id });
-        res.status(201).json({ success: false, message: "User Deleted Successfully !!" });
+        await User.findOneAndUpdate({ _id: result.value.id, isActive: true }, { isActive: false, updatedBy: loggedInUser.id });
+        res.status(201).json({ success: true, message: "User Deleted Successfully !!" });
     } else {
         return res.status(402).json({ success: false, message: `Record not found to delete !!` });
     }
 }
 
 const getUserById = async (req, res) => {
-    const id = req.params.id;
-    const user = await User.findOne({ _id: id, isActive: true })
+
+    const Schema = Joi.object({
+        id: Joi.string().required(),
+    });
+
+    const result = Schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
+
+    const user = await User.findOne({ _id: result.value.id, isActive: true })
         .populate({ path: 'userTypeId', select: 'name' })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
     if (user) {
-        res.json({ success: true, data: user });
+        res.json({ success: true, data: user, message: "User fetched successfully" });
     } else {
         res.status(402).json({ success: false, message: "Data not found" });
     }
@@ -492,5 +514,5 @@ const resendUserOtp = async (req, res) => {
     });
 }
 
-module.exports = { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp, getAllUsersUnlimited }
+module.exports = { addUser, loginUser, updateProfile, getAllUsers, getUserById, deleteUserById, updateUserById, forgotUserPassword, resetUserPassword, resendUserOtp, getUsers }
 

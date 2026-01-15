@@ -54,13 +54,13 @@ const UserSchema = mongoose.Schema({
 });
 
 UserSchema.pre('save', async function (next) {
-    console.log("User Pre Called !!");
-    
+    console.log("pre called")
     if (this.isModified('password')) {
         if (this.password !== this.confirmPassword) {
             return next(new Error('Password and Confirm Password must be same.'));
         }
         this.password = await bcrypt.hash(this.password, 12);
+         console.log("confirm password")
         this.confirmPassword = undefined;
     }
     next();
