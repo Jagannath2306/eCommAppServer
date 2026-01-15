@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const RolePermission = require('../models/rolepagepermission.modal');
 const Joi = require('joi');
 
@@ -145,4 +146,49 @@ const deleteRolePermission = async (req, res) => {
     }
 }
 
-module.exports = { saveRolePermission, updateRolePermission, getAllRolePermission, getRolePermissionById, deleteRolePermission };
+const getPermissions = async (req, res) => {
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    try {
+        const userTypeId = new mongoose.Types.ObjectId(loggedInUser.userTypeId);
+        const permissions = await RolePermission.aggregate([
+            { $match: { userTypeId: userTypeId, isActive: true } },
+            {
+                $lookup: {
+                    from: 'pagemasters',
+                    localField: 'pageId',
+                    foreignField: '_id',
+                    as: 'page'
+                }
+            },
+            { $unwind: '$page' },
+            {
+                $project: {
+                    _id: 0,
+                    pageCode: '$page.pageCode',
+                    actions: 1
+                }
+            }
+        ]);
+        console.log(permissions)
+
+        return res.status(200).json({
+            success: true,
+            data: permissions,
+            message: "Permission fetched successfully"
+        });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: `${err.message}` });
+    }
+}
+module.exports = {
+    saveRolePermission,
+    updateRolePermission,
+    getAllRolePermission,
+    getRolePermissionById,
+    deleteRolePermission,
+    getPermissions
+};

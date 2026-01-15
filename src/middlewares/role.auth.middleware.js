@@ -26,8 +26,6 @@ function checkPermission(pageCode, action = 'view') {
         pageId: page._id,
         isActive: true
       });
-      console.log("** permission")
-      console.log(permission);
 
 
       if (!permission) {

@@ -1,7 +1,7 @@
 const express = require('express');
 const userpagerightsRouter = express.Router();
 const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser , updateMenuConfig, getMenusByUser, getSidebarMenu } = require('../controllers/userpagerights.controller');
+const { saveUserPageRights, updateUserPageRights, getAllUserPageRights, getUserPageRightsById, getPageRightsByUserAndModule, getPageRightsByUser , updateMenuConfig, getSidebarMenus, getPermissions } = require('../controllers/userpagerights.controller');
 
 
 /**
@@ -142,7 +142,7 @@ userpagerightsRouter.post('/GetById', adminAuthMiddleware, getUserPageRightsById
 
   /**
  * @swagger
- * /api/UserPageRights/GetMenusByUser:
+ * /api/UserPageRights/GetMenus:
  *   get:
  *     summary: Get sidebar menus for logged-in user
  *     tags: [UserPageRights]
@@ -160,7 +160,6 @@ userpagerightsRouter.post('/GetById', adminAuthMiddleware, getUserPageRightsById
  *       403:
  *         description: Forbidden
  */
-userpagerightsRouter.get('/GetMenusByUser', authMiddleware, getSidebarMenu);
-
+userpagerightsRouter.get('/GetMenus', authMiddleware, getSidebarMenus);
 
 module.exports = userpagerightsRouter;

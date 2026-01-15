@@ -1,7 +1,7 @@
 const express = require('express');
 const rolePermissionRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveRolePermission, updateRolePermission, getAllRolePermission, getRolePermissionById, deleteRolePermission } = require('../controllers/rolepagepermission.controller');
+const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveRolePermission, updateRolePermission, getAllRolePermission, getRolePermissionById, deleteRolePermission, getPermissions } = require('../controllers/rolepagepermission.controller');
 
 
 /**
@@ -103,5 +103,26 @@ rolePermissionRouter.post('/GetById', adminAuthMiddleware, getRolePermissionById
   */
 rolePermissionRouter.post('/Delete', adminAuthMiddleware, deleteRolePermission);
 
+ /**
+ * @swagger
+ * /api/RolePermission/GetPermissions:
+ *   get:
+ *     summary: Get GetPermissions for logged-in user
+ *     tags: [RolePermission]
+ *     responses:
+ *       200:
+ *         description: GetPermissions fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+rolePermissionRouter.get('/GetPermissions', authMiddleware, getPermissions);
 
 module.exports = rolePermissionRouter;
