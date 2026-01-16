@@ -56,6 +56,15 @@ module.exports = {
                     id: { type: "string" }
                 }
             },
+            GetPageByModuleIdBySubModuleIdByUserType: {
+                type: "object",
+                required: ['moduleId','subModuleId','userTypeId'],
+                properties: {
+                    moduleId: { type: "string" },
+                    subModuleId: { type: "string" },
+                    userTypeId: { type: "string" },
+                }
+            },
             DeletePageMaster: {
                 type: "object",
                 required: ['id'],

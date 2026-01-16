@@ -4,55 +4,55 @@ const path = require('path');
 
 const saveModuleMaster = async (req, res) => {
     console.log(req.body)
-        const loggedInUser = req.session.user;
-        if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
-        }
-        const Schema = Joi.object({
-            name: Joi.string().min(2).max(20).required(),
-            icon: Joi.string().required(),
-            url: Joi.string().required(),
-            defaultActive: Joi.boolean().required(),
-            menuRank: Joi.number().required(),
-        });
-        const result = Schema.validate(req.body);
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
+    const Schema = Joi.object({
+        name: Joi.string().min(2).max(20).required(),
+        icon: Joi.string().required(),
+        url: Joi.string().required(),
+        defaultActive: Joi.boolean().required(),
+        menuRank: Joi.number().required(),
+    });
+    const result = Schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
-        const modulemaster = new ModuleMaster({ ...result.value, createdBy: loggedInUser.id });
+    const modulemaster = new ModuleMaster({ ...result.value, createdBy: loggedInUser.id });
 
-        let response = await modulemaster.save();
-        return res.status(201).json({ success: true, message: "ModuleMaster Saved Successfully !!" });
+    let response = await modulemaster.save();
+    return res.status(201).json({ success: true, message: "ModuleMaster Saved Successfully !!" });
 }
 
 const updateModuleMaster = async (req, res) => {
-        const loggedInUser = req.session.user;
-        if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
-        }
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
 
-        const Schema = Joi.object({
-            id: Joi.string().required(),
-            name: Joi.string().min(2).max(20).required(),
-            icon: Joi.string().required(),
-            url: Joi.string().required(),
-            defaultActive: Joi.boolean().required(),
-            menuRank: Joi.number().required(),
-        });
+    const Schema = Joi.object({
+        id: Joi.string().required(),
+        name: Joi.string().min(2).max(20).required(),
+        icon: Joi.string().required(),
+        url: Joi.string().required(),
+        defaultActive: Joi.boolean().required(),
+        menuRank: Joi.number().required(),
+    });
 
-        const result = Schema.validate({...req.body});
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const result = Schema.validate({ ...req.body });
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
-        const modulemaster = await ModuleMaster.findOneAndUpdate({ _id: result.value.id }, { ...result.value, updatedBy: loggedInUser.id });
+    const modulemaster = await ModuleMaster.findOneAndUpdate({ _id: result.value.id }, { ...result.value, updatedBy: loggedInUser.id });
 
-        if (!modulemaster) {
-            return res.status(400).send({ success: false, message: "Something Went Wrong while updating ModuleMaster" });
-        } else {
-            return res.status(201).json({ success: true, message: "ModuleMaster Updated Successfully !!" });
-        }
+    if (!modulemaster) {
+        return res.status(400).send({ success: false, message: "Something Went Wrong while updating ModuleMaster" });
+    } else {
+        return res.status(201).json({ success: true, message: "ModuleMaster Updated Successfully !!" });
+    }
 }
 
 const getAllModuleMasters = async (req, res) => {
@@ -93,8 +93,21 @@ const getAllModuleMasters = async (req, res) => {
     });
 }
 
+const getModules = async (req, res) => {
+    try {
+        const rows = await ModuleMaster.find({ isActive: true }, { _id: 1, name: 1 })
+        return res.status(200).json({
+            success: true,
+            data: rows,
+            message: "Module fetched successfully"
+        });
+    } catch (err) {
+        return res.status(500).send({ success: false, message: err.message });
+    }
+}
+
 const getModuleMasterById = async (req, res) => {
-const Schema = Joi.object({
+    const Schema = Joi.object({
         id: Joi.string().required()
     });
 
@@ -138,4 +151,11 @@ const deleteModuleMaster = async (req, res) => {
     }
 }
 
-module.exports = { saveModuleMaster, updateModuleMaster, getAllModuleMasters, getModuleMasterById, deleteModuleMaster };
+module.exports = {
+    saveModuleMaster,
+    updateModuleMaster,
+    getAllModuleMasters,
+    getModuleMasterById,
+    deleteModuleMaster,
+    getModules
+};

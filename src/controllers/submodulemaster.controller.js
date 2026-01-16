@@ -4,58 +4,58 @@ const path = require('path');
 
 
 const saveSubModuleMaster = async (req, res) => {
-        const loggedInUser = req.session.user;
-        if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
-        }
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
 
-        const Schema = Joi.object({
-            moduleId: Joi.string().required(),
-            name: Joi.string().min(2).max(20).required(),
-            icon: Joi.string().required(),
-            url: Joi.string().required(),
-            defaultActive: Joi.boolean().required(),
-            menuRank: Joi.number().required(),
-        });
+    const Schema = Joi.object({
+        moduleId: Joi.string().required(),
+        name: Joi.string().min(2).max(20).required(),
+        icon: Joi.string().required(),
+        url: Joi.string().required(),
+        defaultActive: Joi.boolean().required(),
+        menuRank: Joi.number().required(),
+    });
 
-        const result = Schema.validate({...req.body});
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const result = Schema.validate({ ...req.body });
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
-        const submodulemaster = new SubModuleMaster({ ...result.value, createdBy: loggedInUser.id });
+    const submodulemaster = new SubModuleMaster({ ...result.value, createdBy: loggedInUser.id });
 
-        let response = await submodulemaster.save();
-        return res.status(201).json({ success: true, message: "SubModuleMaster Saved Successfully !!" });
+    let response = await submodulemaster.save();
+    return res.status(201).json({ success: true, message: "SubModuleMaster Saved Successfully !!" });
 }
 
 const updateSubModuleMaster = async (req, res) => {
-        const loggedInUser = req.session.user;
-        if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
-        }
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
 
-        const Schema = Joi.object({
-            id: Joi.string().required(),
-            moduleId: Joi.string().required(),
-            name: Joi.string().min(2).max(20).required(),
-            icon: Joi.string().required(),
-            url: Joi.string().required(),
-            defaultActive: Joi.boolean().required(),
-            menuRank: Joi.number().required(),
-        });
-        const result = Schema.validate({...req.body});
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const Schema = Joi.object({
+        id: Joi.string().required(),
+        moduleId: Joi.string().required(),
+        name: Joi.string().min(2).max(20).required(),
+        icon: Joi.string().required(),
+        url: Joi.string().required(),
+        defaultActive: Joi.boolean().required(),
+        menuRank: Joi.number().required(),
+    });
+    const result = Schema.validate({ ...req.body });
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
-        const submodulemaster = await SubModuleMaster.findOneAndUpdate({ _id: result.value.id }, { ...result.value, updatedBy: loggedInUser.id });
+    const submodulemaster = await SubModuleMaster.findOneAndUpdate({ _id: result.value.id }, { ...result.value, updatedBy: loggedInUser.id });
 
-        if (!submodulemaster) {
-            return res.status(400).send({ success: false, message: "Something Went Wrong while updating SubModuleMaster" });
-        } else {
-            return res.status(201).json({ success: true, message: "SubModuleMaster Updated Successfully !!" });
-        }
+    if (!submodulemaster) {
+        return res.status(400).send({ success: false, message: "Something Went Wrong while updating SubModuleMaster" });
+    } else {
+        return res.status(201).json({ success: true, message: "SubModuleMaster Updated Successfully !!" });
+    }
 }
 
 const getAllSubModuleMasters = async (req, res) => {
@@ -98,7 +98,7 @@ const getAllSubModuleMasters = async (req, res) => {
 }
 
 const getSubModuleMasterById = async (req, res) => {
-const Schema = Joi.object({
+    const Schema = Joi.object({
         id: Joi.string().required()
     });
 
@@ -115,6 +115,30 @@ const Schema = Joi.object({
         res.status(200).json({ success: true, data: submodulemaster });
     } else {
         res.status(402).json({ success: false, message: "Data not found" });
+    }
+}
+
+
+const getSubModuleByModuleId = async (req, res) => {
+    try {
+        const Schema = Joi.object({
+            id: Joi.string().required()
+        });
+
+        const result = Schema.validate(req.body);
+        if (result.error) {
+            return res.status(400).send({ success: false, message: result.error.details[0].message });
+        }
+        const { id } = result.value;
+        const submodulemaster = await SubModuleMaster.find({ moduleId: id, isActive: true }, { _id: 1, name: 1 })
+        if (submodulemaster) {
+            res.status(200).json({ success: true, data: submodulemaster, message: "SubModule fetched successfully" });
+        } else {
+            res.status(402).json({ success: false, message: "Data not found" });
+        }
+    }
+    catch (err) {
+        res.status(500).json({ success: false, message: `${err.message}` });
     }
 }
 
@@ -143,4 +167,11 @@ const deleteSubModuleMaster = async (req, res) => {
     }
 }
 
-module.exports = { saveSubModuleMaster, updateSubModuleMaster, getAllSubModuleMasters, getSubModuleMasterById, deleteSubModuleMaster };
+module.exports = { 
+    saveSubModuleMaster,
+     updateSubModuleMaster, 
+     getAllSubModuleMasters, 
+     getSubModuleMasterById,
+      deleteSubModuleMaster,
+      getSubModuleByModuleId
+     };

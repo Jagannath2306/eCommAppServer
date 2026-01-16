@@ -306,7 +306,7 @@ const getSidebarMenus = async (req, res) => {
         const permissions = await RolePagePermission.find({
             userTypeId,
             isActive: true,
-            actions: 'view'
+           'actions.view': true 
         }).populate({
             path: 'pageId',
             match: { isActive: true },

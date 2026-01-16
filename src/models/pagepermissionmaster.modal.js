@@ -17,9 +17,14 @@ const PagePermissionMasterSchema = mongoose.Schema({
         required: [true, 'Name is Required !!']
     },
     actions: {
-        type: [String],
-        required: [true, 'Name is Required !!'],
-        enum: ['view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"]
+        view: { type: Boolean, default: false },
+        create: { type: Boolean, default: false },
+        edit: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false },
+        approve: { type: Boolean, default: false },
+        reject: { type: Boolean, default: false },
+        block: { type: Boolean, default: false },
+        unblock: { type: Boolean, default: false }
     },
     isActive: {
         type: Boolean,
@@ -68,7 +73,7 @@ const PagePermissionMaster = mongoose.model('pagepermissionmaster', PagePermissi
 module.exports = PagePermissionMaster;
 
 // 📌 This does NOT mean a user has permission
-// 📌 This only defines what is possible on that page 
+// 📌 This only defines what is possible on that page
 
 // Action	   Meaning
 // =========================

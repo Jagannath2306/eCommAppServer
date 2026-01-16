@@ -1,7 +1,8 @@
 const express = require('express');
 const submodulemasterRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveSubModuleMaster, updateSubModuleMaster, getAllSubModuleMasters, getSubModuleMasterById, deleteSubModuleMaster } = require('../controllers/submodulemaster.controller');
+const { authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveSubModuleMaster, updateSubModuleMaster, getAllSubModuleMasters, getSubModuleMasterById, deleteSubModuleMaster, getSubModuleByModuleId } = require('../controllers/submodulemaster.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 /**
@@ -32,7 +33,7 @@ const { saveSubModuleMaster, updateSubModuleMaster, getAllSubModuleMasters, getS
  *       401:
  *         description: Unauthorized
  */
-submodulemasterRouter.post('/Save', adminAuthMiddleware, saveSubModuleMaster);
+submodulemasterRouter.post('/Save', authMiddleware, checkPermission('USER_LIST', "create"), saveSubModuleMaster);
 
 /**
  * @swagger
@@ -54,7 +55,7 @@ submodulemasterRouter.post('/Save', adminAuthMiddleware, saveSubModuleMaster);
  *       401:
  *         description: Unauthorized
  */
-submodulemasterRouter.post('/Update', adminAuthMiddleware, updateSubModuleMaster);
+submodulemasterRouter.post('/Update', authMiddleware, checkPermission('USER_LIST', "edit"), updateSubModuleMaster);
 
 
 /**
@@ -79,7 +80,7 @@ submodulemasterRouter.post('/Update', adminAuthMiddleware, updateSubModuleMaster
   *               items:
   *                 type: object
   */
-submodulemasterRouter.post('/GetAll', adminAuthMiddleware, getAllSubModuleMasters);
+submodulemasterRouter.post('/GetAll', authMiddleware, checkPermission('USER_LIST', "view"), getAllSubModuleMasters);
 
 /**
   * @swagger
@@ -97,7 +98,7 @@ submodulemasterRouter.post('/GetAll', adminAuthMiddleware, getAllSubModuleMaster
   *       200:
   *         description: SubModuleMaster fetched successfully.
   */
-submodulemasterRouter.post('/GetById', adminAuthMiddleware, getSubModuleMasterById);
+submodulemasterRouter.post('/GetById', authMiddleware, checkPermission('USER_LIST', "view"), getSubModuleMasterById);
 
 /**
   * @swagger
@@ -115,7 +116,26 @@ submodulemasterRouter.post('/GetById', adminAuthMiddleware, getSubModuleMasterBy
   *       200:
   *         description: SubModuleMaster deleted successfully.
   */
-submodulemasterRouter.post('/Delete', adminAuthMiddleware, deleteSubModuleMaster);
+submodulemasterRouter.post('/Delete', authMiddleware, checkPermission('USER_LIST', "delete"), deleteSubModuleMaster);
 
+
+
+/**
+  * @swagger
+  * /api/SubModuleMaster/GetSubModuleByModuleId:
+  *   post:
+  *     summary: Get Get SubModule By Module Id 
+  *     tags: [SubModuleMaster]
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             $ref: '#/components/schemas/GetSubModuleByModuleId'
+  *     responses:
+  *       200:
+  *         description: SubModuleMaster fetched successfully.
+  */
+submodulemasterRouter.post('/GetSubModuleByModuleId', authMiddleware, checkPermission('PERMISSION_LIST', "view"), getSubModuleByModuleId);
 
 module.exports = submodulemasterRouter;

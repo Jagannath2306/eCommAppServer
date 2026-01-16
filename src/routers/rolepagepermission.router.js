@@ -1,8 +1,8 @@
 const express = require('express');
 const rolePermissionRouter = express.Router();
-const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveRolePermission, updateRolePermission, getAllRolePermission, getRolePermissionById, deleteRolePermission, getPermissions } = require('../controllers/rolepagepermission.controller');
-
+const { authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveRolePermission, updateRolePermission, getAllRolePermission, getRolePermissionById, deleteRolePermission, getPermissions, saveAndUpdatePermissions } = require('../controllers/rolepagepermission.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 /**
  * @swagger
@@ -28,7 +28,7 @@ const { saveRolePermission, updateRolePermission, getAllRolePermission, getRoleP
   *       200:
   *         description: Role Permission saved successfully.
   */
-rolePermissionRouter.post('/Save', adminAuthMiddleware, saveRolePermission);
+rolePermissionRouter.post('/Save', authMiddleware, checkPermission('PERMISSION_LIST', 'create'), saveRolePermission);
 
 
 /**
@@ -47,7 +47,7 @@ rolePermissionRouter.post('/Save', adminAuthMiddleware, saveRolePermission);
   *       200:
   *         description: Role Permission updated successfully.
   */
-rolePermissionRouter.post('/Update', adminAuthMiddleware, updateRolePermission);
+rolePermissionRouter.post('/Update', authMiddleware, checkPermission('PERMISSION_LIST', 'edit'), updateRolePermission);
 
 /**
   * @swagger
@@ -65,7 +65,7 @@ rolePermissionRouter.post('/Update', adminAuthMiddleware, updateRolePermission);
   *       200:
   *         description: Successfully fetched all Role Permission.
   */
-rolePermissionRouter.post('/GetAll', adminAuthMiddleware, getAllRolePermission);
+rolePermissionRouter.post('/GetAll', authMiddleware, checkPermission('PERMISSION_LIST', 'view'), getAllRolePermission);
 
 /**
   * @swagger
@@ -83,7 +83,7 @@ rolePermissionRouter.post('/GetAll', adminAuthMiddleware, getAllRolePermission);
   *       200:
   *         description: Role Permission fetched successfully.
   */
-rolePermissionRouter.post('/GetById', adminAuthMiddleware, getRolePermissionById);
+rolePermissionRouter.post('/GetById', authMiddleware, checkPermission('PERMISSION_LIST', 'view'), getRolePermissionById);
 
 /**
   * @swagger
@@ -101,28 +101,46 @@ rolePermissionRouter.post('/GetById', adminAuthMiddleware, getRolePermissionById
   *       200:
   *         description: Role Permission deleted successfully.
   */
-rolePermissionRouter.post('/Delete', adminAuthMiddleware, deleteRolePermission);
+rolePermissionRouter.post('/Delete', authMiddleware, checkPermission('PERMISSION_LIST', 'delete'), deleteRolePermission);
 
- /**
+/**
+* @swagger
+* /api/RolePermission/GetPermissions:
+*   get:
+*     summary: Get GetPermissions for logged-in user
+*     tags: [RolePermission]
+*     responses:
+*       200:
+*         description: GetPermissions fetched successfully
+*         content:
+*           application/json:
+*             schema:
+*               type: array
+*               items:
+*                 type: object
+*       401:
+*         description: Unauthorized
+*       403:
+*         description: Forbidden
+*/
+rolePermissionRouter.get('/GetPermissions', authMiddleware, getPermissions);
+
+/**
  * @swagger
- * /api/RolePermission/GetPermissions:
- *   get:
- *     summary: Get GetPermissions for logged-in user
+ * /api/RolePermission/SaveAndUpdatePermissions:
+ *   post:
+ *     summary: Save And Update Permissions
  *     tags: [RolePermission]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SaveAndUpdatePermissions'
  *     responses:
  *       200:
- *         description: GetPermissions fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
+ *         description: Save And Update Permissions successfully.
  */
-rolePermissionRouter.get('/GetPermissions', authMiddleware, getPermissions);
+rolePermissionRouter.post('/SaveAndUpdatePermissions', authMiddleware, checkPermission('PERMISSION_LIST', 'edit'), saveAndUpdatePermissions);
 
 module.exports = rolePermissionRouter;

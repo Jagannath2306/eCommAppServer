@@ -9,12 +9,19 @@ module.exports = {
                     subModuleId: { type: "string" },
                     pageId: { type: "string" },
                     actions: {
-                        type: "array",
-                        items: {
-                            type: "string",
-                            enum: ['view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"]
-                        },
-                        minItems: 1
+                        type: "object",
+                        minProperties: 1,
+                        additionalProperties: false,
+                        properties: {
+                            view: { type: "boolean" },
+                            create: { type: "boolean" },
+                            edit: { type: "boolean" },
+                            delete: { type: "boolean" },
+                            approve: { type: "boolean" },
+                            reject: { type: "boolean" },
+                            block: { type: "boolean" },
+                            unblock: { type: "boolean" }
+                        }
                     }
                 }
             },
@@ -26,13 +33,20 @@ module.exports = {
                     moduleId: { type: "string" },
                     subModuleId: { type: "string" },
                     pageId: { type: "string" },
-                     actions: {
-                        type: "array",
-                        items: {
-                            type: "string",
-                            enum: ['view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"]
-                        },
-                        minItems: 1
+                    actions: {
+                        type: "object",
+                        minProperties: 1,
+                        additionalProperties: false,
+                        properties: {
+                            view: { type: "boolean" },
+                            create: { type: "boolean" },
+                            edit: { type: "boolean" },
+                            delete: { type: "boolean" },
+                            approve: { type: "boolean" },
+                            reject: { type: "boolean" },
+                            block: { type: "boolean" },
+                            unblock: { type: "boolean" }
+                        }
                     }
                 }
             },

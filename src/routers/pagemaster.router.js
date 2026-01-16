@@ -1,7 +1,8 @@
 const express = require('express');
 const pagemasterRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { savePageMaster, updatePageMaster, getAllPageMasters, getPageMasterById, deletePageMaster } = require('../controllers/pagemaster.controller');
+const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
+const { savePageMaster, updatePageMaster, getAllPageMasters, getPageMasterById, deletePageMaster, getPageByModuleIdBySubModuleIdByUserTypeId } = require('../controllers/pagemaster.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 /**
@@ -28,7 +29,7 @@ const { savePageMaster, updatePageMaster, getAllPageMasters, getPageMasterById, 
   *       200:
   *         description: PageMaster saved successfully.
   */
-pagemasterRouter.post('/Save', adminAuthMiddleware, savePageMaster);
+pagemasterRouter.post('/Save', authMiddleware,checkPermission("USER_LIST","create"), savePageMaster);
 
 
 /**
@@ -47,7 +48,7 @@ pagemasterRouter.post('/Save', adminAuthMiddleware, savePageMaster);
   *       200:
   *         description: PageMaster updated successfully.
   */
-pagemasterRouter.post('/Update', adminAuthMiddleware, updatePageMaster);
+pagemasterRouter.post('/Update', authMiddleware,checkPermission("USER_LIST","edit"), updatePageMaster);
 
 /**
   * @swagger
@@ -65,7 +66,7 @@ pagemasterRouter.post('/Update', adminAuthMiddleware, updatePageMaster);
   *       200:
   *         description: Successfully fetched all PageMasters.
   */
-pagemasterRouter.post('/GetAll', adminAuthMiddleware, getAllPageMasters);
+pagemasterRouter.post('/GetAll', authMiddleware,checkPermission("USER_LIST","view"), getAllPageMasters);
 
 /**
   * @swagger
@@ -83,7 +84,7 @@ pagemasterRouter.post('/GetAll', adminAuthMiddleware, getAllPageMasters);
   *       200:
   *         description: PageMaster fetched successfully.
   */
-pagemasterRouter.post('/GetById', adminAuthMiddleware, getPageMasterById);
+pagemasterRouter.post('/GetById', authMiddleware,checkPermission("USER_LIST","view"), getPageMasterById);
 
 /**
   * @swagger
@@ -101,7 +102,25 @@ pagemasterRouter.post('/GetById', adminAuthMiddleware, getPageMasterById);
   *       200:
   *         description: PageMaster deleted successfully.
   */
-pagemasterRouter.post('/Delete', adminAuthMiddleware, deletePageMaster);
+pagemasterRouter.post('/Delete', authMiddleware,checkPermission("USER_LIST","delete"), deletePageMaster);
 
+
+/**
+  * @swagger
+  * /api/PageMaster/GetPageByModuleIdBySubModuleIdByUserTypeId:
+  *   post:
+  *     summary: Get GetPageByModuleIdBySubModuleIdByUserType by Ids
+  *     tags: [PageMaster]
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             $ref: '#/components/schemas/GetPageByModuleIdBySubModuleIdByUserType'
+  *     responses:
+  *       200:
+  *         description: GetPageByModuleIdBySubModuleIdByUserType fetched successfully.
+  */
+pagemasterRouter.post('/GetPageByModuleIdBySubModuleIdByUserTypeId', authMiddleware,checkPermission("PERMISSION_LIST","view"), getPageByModuleIdBySubModuleIdByUserTypeId);
 
 module.exports = pagemasterRouter;

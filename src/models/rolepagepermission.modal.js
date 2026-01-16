@@ -12,11 +12,15 @@ const RolePagePermissionSchema = new mongoose.Schema(
             ref: 'pagemaster',
             required: true
         },
-
         actions: {
-            type: [String],
-            required: true,
-            enum: ['view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"]
+            view: { type: Boolean, default: false },
+            create: { type: Boolean, default: false },
+            edit: { type: Boolean, default: false },
+            delete: { type: Boolean, default: false },
+            approve: { type: Boolean, default: false },
+            reject: { type: Boolean, default: false },
+            block: { type: Boolean, default: false },
+            unblock: { type: Boolean, default: false }
         },
         isActive: {
             type: Boolean,

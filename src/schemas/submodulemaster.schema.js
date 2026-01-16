@@ -54,6 +54,13 @@ module.exports = {
                     id: { type: "string" }
                 }
             },
+            GetSubModuleByModuleId: {
+                type: "object",
+                required: ['id'],
+                properties: {
+                    id: { type: "string" }
+                }
+            },
             DeleteSubModuleMaster: {
                 type: "object",
                 required: ['id'],

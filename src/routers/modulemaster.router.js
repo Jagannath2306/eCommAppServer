@@ -1,7 +1,8 @@
 const express = require('express');
 const modulemasterRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveModuleMaster, updateModuleMaster, getAllModuleMasters, getModuleMasterById, deleteModuleMaster } = require('../controllers/modulemaster.controller');
+const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveModuleMaster, updateModuleMaster, getAllModuleMasters, getModuleMasterById, deleteModuleMaster, getModules } = require('../controllers/modulemaster.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 /**
@@ -118,5 +119,22 @@ modulemasterRouter.post('/GetById', adminAuthMiddleware, getModuleMasterById);
   */
 modulemasterRouter.post('/Delete', adminAuthMiddleware, deleteModuleMaster);
 
+/**
+ * @swagger
+ * /api/ModuleMaster/GetModules:
+ *   get:
+ *     summary: Get All ModuleMaster
+ *     tags: [ModuleMaster]
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+modulemasterRouter.get('/GetModules', authMiddleware, checkPermission('PERMISSION_LIST', "view"), getModules);
 
 module.exports = modulemasterRouter;

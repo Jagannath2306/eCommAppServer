@@ -1,6 +1,7 @@
 const { default: mongoose } = require('mongoose');
 const RolePermission = require('../models/rolepagepermission.modal');
 const Joi = require('joi');
+const RolePagePermission = require('../models/rolepagepermission.modal');
 
 const saveRolePermission = async (req, res) => {
     const loggedInUser = req.session.user;
@@ -12,10 +13,16 @@ const saveRolePermission = async (req, res) => {
     const Schema = Joi.object({
         userTypeId: Joi.string().required(),
         pageId: Joi.string().min(2).max(50).required(),
-        actions: Joi.array()
-            .items(Joi.string().valid('view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"))
-            .min(1)
-            .required()
+        actions: Joi.object({
+            view: Joi.boolean().default(false),
+            create: Joi.boolean().default(false),
+            edit: Joi.boolean().default(false),
+            delete: Joi.boolean().default(false),
+            approve: Joi.boolean().default(false),
+            reject: Joi.boolean().default(false),
+            block: Joi.boolean().default(false),
+            unblock: Joi.boolean().default(false)
+        }).min(1).required()
     });
 
     const result = Schema.validate({ ...req.body });
@@ -39,10 +46,16 @@ const updateRolePermission = async (req, res) => {
         id: Joi.string().required(),
         userTypeId: Joi.string().required(),
         pageId: Joi.string().min(2).max(50).required(),
-        actions: Joi.array()
-            .items(Joi.string().valid('view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"))
-            .min(1)
-            .required()
+        actions: Joi.object({
+            view: Joi.boolean().default(false),
+            create: Joi.boolean().default(false),
+            edit: Joi.boolean().default(false),
+            delete: Joi.boolean().default(false),
+            approve: Joi.boolean().default(false),
+            reject: Joi.boolean().default(false),
+            block: Joi.boolean().default(false),
+            unblock: Joi.boolean().default(false)
+        }).min(1).required()
     });
 
     const result = Schema.validate({ ...req.body });
@@ -168,12 +181,20 @@ const getPermissions = async (req, res) => {
                 $project: {
                     _id: 0,
                     pageCode: '$page.pageCode',
-                    actions: 1
+
+                    actions: {
+                        view: '$actions.view',
+                        create: '$actions.create',
+                        edit: '$actions.edit',
+                        delete: '$actions.delete',
+                        approve: '$actions.approve',
+                        reject: '$actions.reject',
+                        block: '$actions.block',
+                        unblock: '$actions.unblock'
+                    }
                 }
             }
         ]);
-        console.log(permissions)
-
         return res.status(200).json({
             success: true,
             data: permissions,
@@ -184,11 +205,81 @@ const getPermissions = async (req, res) => {
         res.status(500).json({ success: false, message: `${err.message}` });
     }
 }
+
+const saveAndUpdatePermissions = async (req, res) => {
+
+    try {
+        const loggedInUser = req.session.user;
+        if (!loggedInUser) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
+        const Schema = Joi.object({
+            userTypeId: Joi.string().required(),
+            permissions: Joi.array().items(
+                Joi.object({
+                    pageId: Joi.string().required(),
+                    actions: Joi.object({
+                        view: Joi.boolean().default(false),
+                        create: Joi.boolean().default(false),
+                        edit: Joi.boolean().default(false),
+                        delete: Joi.boolean().default(false),
+                        approve: Joi.boolean().default(false),
+                        reject: Joi.boolean().default(false),
+                        block: Joi.boolean().default(false),
+                        unblock: Joi.boolean().default(false)
+                    }).required()
+                })
+            ).min(1).required()
+        });
+
+        const result = Schema.validate({ ...req.body });
+        if (result.error) {
+            return res.status(400).send({ success: false, message: result.error.details[0].message });
+        }
+
+        const { userTypeId, permissions } = result.value;
+
+        if (!mongoose.Types.ObjectId.isValid(userTypeId)) {
+            return res.status(400).json({ success: false, message: "Invalid User Type ID" });
+        }
+
+        // 1. Prepare bulk operations
+        const ops = permissions.map(perm => ({
+            updateOne: {
+                filter: {
+                    userTypeId: new mongoose.Types.ObjectId(userTypeId),
+                    pageId: new mongoose.Types.ObjectId(perm.pageId)
+                },
+                update: {
+                    $set: {
+                        actions: perm.actions,
+                        updatedOn: new Date()
+                    }
+                },
+                upsert: true // Creates the record if it doesn't exist
+            }
+        }));
+
+        // 2. Execute bulkWrite
+        if (ops.length > 0) {
+            await RolePagePermission.bulkWrite(ops);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Permissions updated successfully"
+        });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
 module.exports = {
     saveRolePermission,
     updateRolePermission,
     getAllRolePermission,
     getRolePermissionById,
     deleteRolePermission,
-    getPermissions
+    getPermissions,
+    saveAndUpdatePermissions
 };

@@ -1,63 +1,64 @@
+const { default: mongoose } = require('mongoose');
 const PageMaster = require('../models/pagemaster.model');
 const Joi = require('joi');
 
 const savePageMaster = async (req, res) => {
-        const loggedInUser = req.session.user;
+    const loggedInUser = req.session.user;
 
-        if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
-        }
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
 
-        const Schema = Joi.object({
-            moduleId: Joi.string().required(),
-            subModuleId: Joi.string().required(),
-            name: Joi.string().min(2).max(20).required(),
-            icon: Joi.string().required(),
-            url: Joi.string().required(),
-            defaultActive: Joi.boolean().required(),
-            menuRank: Joi.number().required(),
-        });
+    const Schema = Joi.object({
+        moduleId: Joi.string().required(),
+        subModuleId: Joi.string().required(),
+        name: Joi.string().min(2).max(20).required(),
+        icon: Joi.string().required(),
+        url: Joi.string().required(),
+        defaultActive: Joi.boolean().required(),
+        menuRank: Joi.number().required(),
+    });
 
-        const result = Schema.validate({ ...req.body });
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const result = Schema.validate({ ...req.body });
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
-        const pagemaster = new PageMaster({ ...result.value, createdBy: loggedInUser.id });
+    const pagemaster = new PageMaster({ ...result.value, createdBy: loggedInUser.id });
 
-        let response = await pagemaster.save();
-        return res.status(201).json({ success: true, message: "PageMaster Saved Successfully !!" });
+    let response = await pagemaster.save();
+    return res.status(201).json({ success: true, message: "PageMaster Saved Successfully !!" });
 }
 
 const updatePageMaster = async (req, res) => {
-        const loggedInUser = req.session.user;
-        if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
-        }
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
 
-        const Schema = Joi.object({
-            id: Joi.string().required(),
-            moduleId: Joi.string().required(),
-            subModuleId: Joi.string().required(),
-            name: Joi.string().min(2).max(20).required(),
-            icon: Joi.string().required(),
-            url: Joi.string().required(),
-            defaultActive: Joi.boolean().required(),
-            menuRank: Joi.number().required(),
-        });
+    const Schema = Joi.object({
+        id: Joi.string().required(),
+        moduleId: Joi.string().required(),
+        subModuleId: Joi.string().required(),
+        name: Joi.string().min(2).max(20).required(),
+        icon: Joi.string().required(),
+        url: Joi.string().required(),
+        defaultActive: Joi.boolean().required(),
+        menuRank: Joi.number().required(),
+    });
 
-        const result = Schema.validate({ ...req.body });
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const result = Schema.validate({ ...req.body });
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
 
-        const pagemaster = await PageMaster.findOneAndUpdate({ _id: result.value.id }, { ...result.value, updatedBy: loggedInUser.id });
+    const pagemaster = await PageMaster.findOneAndUpdate({ _id: result.value.id }, { ...result.value, updatedBy: loggedInUser.id });
 
-        if (!pagemaster) {
-            return res.status(400).send({ success: false, message: "Something Went Wrong while updating PageMaster" });
-        } else {
-            return res.status(201).json({ success: true, message: "PageMaster Updated Successfully !!" });
-        }
+    if (!pagemaster) {
+        return res.status(400).send({ success: false, message: "Something Went Wrong while updating PageMaster" });
+    } else {
+        return res.status(201).json({ success: true, message: "PageMaster Updated Successfully !!" });
+    }
 }
 
 const getAllPageMasters = async (req, res) => {
@@ -101,7 +102,7 @@ const getAllPageMasters = async (req, res) => {
 }
 
 const getPageMasterById = async (req, res) => {
-const Schema = Joi.object({
+    const Schema = Joi.object({
         id: Joi.string().required()
     });
 
@@ -119,6 +120,89 @@ const Schema = Joi.object({
         res.status(200).json({ success: true, data: pagemaster });
     } else {
         res.status(402).json({ success: false, message: "Data not found" });
+    }
+}
+
+
+const getPageByModuleIdBySubModuleIdByUserTypeId = async (req, res) => {
+  try {
+     const Schema = Joi.object({
+        moduleId: Joi.string().required(),
+        subModuleId: Joi.string().required(),
+        userTypeId: Joi.string().required()
+    });
+
+    const result = Schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
+    
+        const { moduleId, subModuleId, userTypeId } = req.body; // or req.query
+
+        // 1. Validate ObjectIds to prevent "splitPath" or casting errors
+        if (!mongoose.Types.ObjectId.isValid(moduleId) || 
+            !mongoose.Types.ObjectId.isValid(subModuleId) || 
+            !mongoose.Types.ObjectId.isValid(userTypeId)) {
+            return res.status(400).json({ success: false, message: "Invalid IDs provided" });
+        }
+
+        const data = await PageMaster.aggregate([
+            {
+                $match: {
+                    moduleId: new mongoose.Types.ObjectId(moduleId),
+                    subModuleId: new mongoose.Types.ObjectId(subModuleId),
+                    isActive: true
+                }
+            },
+            // 🔗 Join with permissions for the specific User Type
+            {
+                $lookup: {
+                    from: 'rolepagepermissions',
+                    let: { pageId: '$_id' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$pageId', '$$pageId'] },
+                                        { $eq: ['$userTypeId', new mongoose.Types.ObjectId(userTypeId)] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: 'existingPermission'
+                }
+            },
+            {
+                $addFields: {
+                    // If a record exists, take its actions. Otherwise, return empty strings/bools
+                    // This allows your frontend to bind to these fields immediately
+                    actions: {
+                        $ifNull: [{ $arrayElemAt: ['$existingPermission.actions', 0] }, {
+                            create: false,
+                            view: false,
+                            edit: false,
+                            delete: false
+                        }]
+                    }
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    pageCode: 1,
+                    actions: 1,
+                    moduleId: 1,
+                    subModuleId: 1
+                }
+            },
+            { $sort: { menuRank: 1 } }
+        ]);
+
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 }
 
@@ -147,4 +231,11 @@ const deletePageMaster = async (req, res) => {
     }
 }
 
-module.exports = { savePageMaster, updatePageMaster, getAllPageMasters, getPageMasterById, deletePageMaster };
+module.exports = {
+    savePageMaster,
+    updatePageMaster,
+    getAllPageMasters,
+    getPageMasterById,
+    deletePageMaster,
+    getPageByModuleIdBySubModuleIdByUserTypeId
+};

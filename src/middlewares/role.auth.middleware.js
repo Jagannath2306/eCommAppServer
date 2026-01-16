@@ -33,7 +33,7 @@ function checkPermission(pageCode, action = 'view') {
       }
 
       // 3️⃣ Check action
-      if (!permission.actions.includes(action)) {
+      if (!permission || permission.actions?.[action] !== true) {
         return res.status(403).json({ message: 'Action not allowed' });
       }
 

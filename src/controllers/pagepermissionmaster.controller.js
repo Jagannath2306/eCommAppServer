@@ -12,10 +12,16 @@ const savePagePermission = async (req, res) => {
         moduleId: Joi.string().required(),
         subModuleId: Joi.string().required(),
         pageId: Joi.string().min(2).max(50).required(),
-        actions: Joi.array()
-            .items(Joi.string().valid('view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"))
-            .min(1)
-            .required()
+        actions: Joi.object({
+                    view: Joi.boolean().default(false),
+                    create: Joi.boolean().default(false),
+                    edit: Joi.boolean().default(false),
+                    delete: Joi.boolean().default(false),
+                    approve: Joi.boolean().default(false),
+                    reject: Joi.boolean().default(false),
+                    block: Joi.boolean().default(false),
+                    unblock: Joi.boolean().default(false)
+                }) .min(1).required()
     });
 
     const result = Schema.validate({ ...req.body });
@@ -40,10 +46,16 @@ const updatePagePermission = async (req, res) => {
         moduleId: Joi.string().required(),
         subModuleId: Joi.string().required(),
         pageId: Joi.string().min(2).max(50).required(),
-        actions: Joi.array()
-            .items(Joi.string().valid('view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"))
-            .min(1)
-            .required()
+        actions: Joi.object({
+                    view: Joi.boolean().default(false),
+                    create: Joi.boolean().default(false),
+                    edit: Joi.boolean().default(false),
+                    delete: Joi.boolean().default(false),
+                    approve: Joi.boolean().default(false),
+                    reject: Joi.boolean().default(false),
+                    block: Joi.boolean().default(false),
+                    unblock: Joi.boolean().default(false)
+                }) .min(1).required()
     });
 
     const result = Schema.validate({ ...req.body });

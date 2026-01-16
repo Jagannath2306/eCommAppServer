@@ -8,12 +8,19 @@ module.exports = {
                     userTypeId: { type: "string" },
                     pageId: { type: "string" },
                     actions: {
-                        type: "array",
-                        items: {
-                            type: "string",
-                            enum: ['view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"]
-                        },
-                        minItems: 1
+                        type: "object",
+                        minProperties: 1,
+                        additionalProperties: false,
+                        properties: {
+                            view: { type: "boolean" },
+                            create: { type: "boolean" },
+                            edit: { type: "boolean" },
+                            delete: { type: "boolean" },
+                            approve: { type: "boolean" },
+                            reject: { type: "boolean" },
+                            block: { type: "boolean" },
+                            unblock: { type: "boolean" }
+                        }
                     }
                 }
             },
@@ -24,13 +31,20 @@ module.exports = {
                     id: { type: "string" },
                     userTypeId: { type: "string" },
                     pageId: { type: "string" },
-                     actions: {
-                        type: "array",
-                        items: {
-                            type: "string",
-                            enum: ['view', 'create', 'edit', 'delete', "approve", "reject", "block", "unblock"]
-                        },
-                        minItems: 1
+                    actions: {
+                        type: "object",
+                        minProperties: 1,
+                        additionalProperties: false,
+                        properties: {
+                            view: { type: "boolean" },
+                            create: { type: "boolean" },
+                            edit: { type: "boolean" },
+                            delete: { type: "boolean" },
+                            approve: { type: "boolean" },
+                            reject: { type: "boolean" },
+                            block: { type: "boolean" },
+                            unblock: { type: "boolean" }
+                        }
                     }
                 }
             },
@@ -62,6 +76,46 @@ module.exports = {
                     id: { type: "string" }
                 }
             },
+            SaveAndUpdatePermissions: {
+                type: "object",
+                required: ["userTypeId", "permissions"],
+                additionalProperties: false,
+                properties: {
+                    userTypeId: {
+                        type: "string",
+                    },
+                    permissions: {
+                        type: "array",
+                        minItems: 1,
+                        items: {
+                            type: "object",
+                            required: ["pageId", "actions"],
+                            additionalProperties: false,
+                            properties: {
+                                pageId: {
+                                    type: "string",
+                                },
+                                actions: {
+                                    type: "object",
+                                    minProperties: 1,
+                                    additionalProperties: false,
+                                    properties: {
+                                        view: { type: "boolean" },
+                                        create: { type: "boolean" },
+                                        edit: { type: "boolean" },
+                                        delete: { type: "boolean" },
+                                        approve: { type: "boolean" },
+                                        reject: { type: "boolean" },
+                                        block: { type: "boolean" },
+                                        unblock: { type: "boolean" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            ,
             DeleteRolePermission: {
                 type: "object",
                 required: ['id'],
