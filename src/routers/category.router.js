@@ -1,7 +1,7 @@
 const express = require('express');
 const categoryRouter = express.Router();
 const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveCategory, updateCategory, deleteCategory, getCategoryById, getAllCategories, getCategories } = require('../controllers/category.controller');
+const { saveCategory, updateCategory, deleteCategory, getCategoryById, getAllCategories, getCategories, getCategoriesList } = require('../controllers/category.controller');
 const checkPermission = require('../middlewares/role.auth.middleware');
 
 
@@ -58,7 +58,7 @@ categoryRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "
 
 /**
   * @swagger
-  * /api/Category/GetAll:
+  * /api/Category/GetAllCategories:
   *   post:
   *     summary: Get All Categories
   *     tags: [Category]
@@ -78,26 +78,31 @@ categoryRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "
   *               items:
   *                 type: object
   */
-categoryRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllCategories);
+categoryRouter.post('/GetAllCategories', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllCategories);
 
 /**
-  * @swagger
-  * /api/Category/GetById/{id}:
-  *   get:
-  *     summary: Get category by Id
-  *     tags: [Category]
-  *     parameters:
-  *       - in: path
-  *         name: id
-  *         required: true
-  *         description: Category Id
-  *         schema:
-  *           type: string
-  *     responses:
-  *       200:
-  *         description: Returns Category object.
-  */
-categoryRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategoryById);
+ * @swagger
+ * /api/Category/GetById:
+ *   post:
+ *     summary: Get category by Id
+ *     tags: [Category]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: Category Id
+ *     responses:
+ *       200:
+ *         description: Returns Category object.
+ */
+categoryRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategoryById);
 
 /**
  * @swagger
@@ -115,6 +120,23 @@ categoryRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST
 
 categoryRouter.get('/GetCategories', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategories);
 
+
+/**
+ * @swagger
+ * /api/Category/GetCategoriesList:
+ *   get:
+ *     tags: [Category]
+ *     summary: Get all categories
+ *     description: Returns all categories
+ *     responses:
+ *       200:
+ *         description: Success
+ *       401:
+ *         description: Unauthorized
+ */
+
+categoryRouter.get('/GetCategoriesList', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategoriesList);
+
 /**
   * @swagger
   * /api/Category/Delete:
@@ -131,7 +153,7 @@ categoryRouter.get('/GetCategories', authMiddleware, checkPermission("PRODUCT_LI
   *       200:
   *         description: Category deleted successfully.
   */
-categoryRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteCategory);
+categoryRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteCategory);
 
 
 module.exports = categoryRouter;

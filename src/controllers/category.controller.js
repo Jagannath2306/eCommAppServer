@@ -84,14 +84,25 @@ const saveCategory = (req, res) => {
 
 const updateCategory = async (req, res) => {
     uploadCategory(req, res, async function (err) {
-        if (err) {
-            return res.status(400).json({ success: false, message: err.message });
-        }
+       try{
+         if (err) {
+                return res.status(400).json({ success: false, message: err.message });
+            }
 
-        const loggedInUser = req.session.user;
-        if (!loggedInUser) {
-            return res.status(401).json({ success: false, message: "Unauthorized" });
-        }
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Category image is required"
+                });
+            }
+
+            const loggedInUser = req.session?.user;
+            if (!loggedInUser) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized"
+                });
+            }
 
         const Schema = Joi.object({
             id: Joi.string().hex().length(24).required(),
@@ -126,7 +137,7 @@ const updateCategory = async (req, res) => {
 
         const categoryUpdate = await Category.findOneAndUpdate({ _id: id }, {
             ...result.value,
-            slug: slugify(name, { lower: true, strict: true }),
+            slug: slugify(result.value.name, { lower: true, strict: true }),
             imagePath: filePath,
             updatedBy: loggedInUser.id
         });
@@ -134,6 +145,14 @@ const updateCategory = async (req, res) => {
             success: true,
             message: "Category updated successfully"
         });
+       }
+       catch (error) {
+            console.error("UpdateCategory Error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        }
     });
 }
 
@@ -176,9 +195,18 @@ const getAllCategories = async (req, res) => {
 }
 
 const getCategoryById = async (req, res) => {
-    const id = req.params.id;
+     const Schema = Joi.object({
+        id: Joi.string().required()
+    });
 
-    const category = await Category.findOne({ _id: id, isActive: true })
+    const result = Schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
+
+    const categoryId = result.value.id;
+
+    const category = await Category.findOne({ _id: categoryId, isActive: true })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
     if (category) {
@@ -221,11 +249,22 @@ const getCategories = async (req, res) => {
         message: "Categories fetched successfully"
     });
 }
+
+const getCategoriesList = async (req, res) => {
+
+    const rows = await Category.find({ isActive: true })
+    return res.status(200).json({
+        success: true,
+        data: rows,
+        message: "Categories fetched successfully"
+    });
+}
 module.exports = {
     saveCategory,
     updateCategory,
     deleteCategory,
     getCategoryById,
     getAllCategories,
-    getCategories
+    getCategories,
+    getCategoriesList
 };
