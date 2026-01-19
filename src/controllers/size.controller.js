@@ -4,60 +4,113 @@ const Joi = require('joi');
 const saveSize = async (req, res) => {
     const loggedInUser = req.session.user;
 
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
     const Schema = Joi.object({
-        name: Joi.string().min(2).max(20).required()
+        name: Joi.string().min(1).max(20).required()
     });
 
-    const result = Schema.validate(req.body);
-    if (result.error) {
-        return res.status(400).send({ success :false, message: result.error.details[0].message });
+    const { error, value } = Schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
     }
 
-    const name = result.value.name;
-    const size = new Size({ name: name, createdBy: loggedInUser.id });
+    const name = value.name.trim().toUpperCase();
 
-    let isExists = await Size.isExists(name);
-    if (!isExists) {
-        let result = await size.save();
-        res.status(201).json({ success: true, message: "Size Saved Successfully !!" });
-    } else {
-return res.status(400).json({ success: false, message: `Size Name ${name} already exists !!` });
+    const isExists = await Size.isExists(name);
+    if (isExists) {
+        return res.status(400).json({
+            success: false,
+            message: `Size Name ${name} already exists !!`
+        });
     }
-}
 
+    await new Size({
+        name,
+        createdBy: loggedInUser.id
+    }).save();
+
+    return res.status(201).json({
+        success: true,
+        message: 'Size Saved Successfully !!'
+    });
+};
 
 const updateSize = async (req, res) => {
     const loggedInUser = req.session.user;
 
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
     const Schema = Joi.object({
-        id: Joi.string().required(),
+        id: Joi.string().hex().length(24).required(),
         name: Joi.string().min(2).max(20).required()
     });
 
-    const result = Schema.validate(req.body);
-    if (result.error) {
-        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    const { error, value } = Schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
     }
 
-    const name = result.value.name;
-    const userTypeId = result.value.id;
+    const sizeId = value.id;
+    const name = value.name.trim().toUpperCase();
 
-
-    let isExists = await Size.isExists(name, userTypeId);
-    if (!isExists) {
-        await Size.findOneAndUpdate({ _id: userTypeId }, { name: name, updatedBy: loggedInUser.id });
-        res.status(201).json({ success: true, message: "Size Updated Successfully !!" });
-    } else {
-        return res.status(400).json({ success: false, message: `Size Name ${name} already exists !!` });
+    const isExists = await Size.isExists(name, sizeId);
+    if (isExists) {
+        return res.status(400).json({
+            success: false,
+            message: `Size Name ${name} already exists !!`
+        });
     }
-}
+
+    const updated = await Size.findOneAndUpdate(
+        { _id: sizeId },
+        { name, updatedBy: loggedInUser.id },
+        { new: true }
+    );
+
+    if (!updated) {
+        return res.status(404).json({
+            success: false,
+            message: 'Size not found'
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: 'Size Updated Successfully !!'
+    });
+};
+
 
 
 const deleteSize = async (req, res) => {
     const loggedInUser = req.session.user;
 
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
     const Schema = Joi.object({
-        id: Joi.string().required()
+        id: Joi.string().hex().length(24).required(),
     });
 
     const result = Schema.validate(req.body);
@@ -65,14 +118,14 @@ const deleteSize = async (req, res) => {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
-    const userTypeId = result.value.id;
+    const id = result.value.id;
 
-    let isExists = await Size.findOne({ _id: userTypeId, isActive: true }, { name: 1 });
+    let isExists = await Size.findOne({ _id: id, isActive: true }, { name: 1 });
     if (isExists) {
-        await Size.findOneAndUpdate({ _id: userTypeId }, { isActive: false, updatedBy: loggedInUser.id });
+        await Size.findOneAndUpdate({ _id: id }, { isActive: false, updatedBy: loggedInUser.id });
         res.status(201).json({ success: true, message: "Size Deleted Successfully !!" });
     } else {
-     return res.status(402).json({ success: false, message: `Record not found to delete !!` });
+        return res.status(402).json({ success: false, message: `Record not found to delete !!` });
     }
 }
 
@@ -90,16 +143,16 @@ const getSizeById = async (req, res) => {
 }
 
 const getAllSize = async (req, res) => {
-     const schema = Joi.object({
-            pageSize: Joi.number().min(5).required(),
-            page: Joi.number().min(1).required(),
-            sortCol: Joi.string().required(),
-            sort: Joi.string().valid('asc', 'desc').required()
-        });
-        const result = schema.validate(req.body);
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
+    const schema = Joi.object({
+        pageSize: Joi.number().min(5).required(),
+        page: Joi.number().min(1).required(),
+        sortCol: Joi.string().required(),
+        sort: Joi.string().valid('asc', 'desc').required()
+    });
+    const result = schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
     const limitVal = Number.parseInt(result.value.pageSize) || 10;
     const page = Number.parseInt(result.value.page) || 1;
     const skipCount = limitVal * (page - 1);
@@ -119,9 +172,9 @@ const getAllSize = async (req, res) => {
     return res.status(200).json({
         success: true,
         data: rows,
-         meta: {
-            page : page,
-            pageSize : limitVal,
+        meta: {
+            page: page,
+            pageSize: limitVal,
             total: count
         }
     });

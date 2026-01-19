@@ -3,11 +3,17 @@ const mongoose = require('mongoose');
 const ColorSchema = mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'Name is Required !!']
+        required: [true, 'Name is Required !!'],
+        unique: true,
+        trim: true,
+        lowercase: true
     },
     code: {
         type: String,
-        required: [true, 'Code is Required !!']
+        required: [true, 'Code is Required !!'],
+        unique: true,
+        uppercase: true,
+        trim: true
     },
     isActive: {
         type: Boolean,
@@ -23,7 +29,6 @@ const ColorSchema = mongoose.Schema({
         ref: 'usermaster'
     }
 }, {
-    // timestamps: true
     timestamps: {
         createdAt: 'createdOn',
         updatedAt: 'updatedOn'
@@ -31,16 +36,16 @@ const ColorSchema = mongoose.Schema({
 });
 
 ColorSchema.statics.isExists = async function isExists(_name, _code, id) {
-    let Color;
+    let color;
 
     if (id) {
         // Check on Update
-        Color = await this.findOne({ $or: [{ name: _name }, { code: _code }], isActive: true, _id: { $ne: id } }, { name: 1 })
+        color = await this.findOne({ $or: [{ name: _name }, { code: _code }], isActive: true, _id: { $ne: id } }, { name: 1 })
     } else {
         //Check on Insert
-        Color = await this.findOne({ $or: [{ name: _name }, { code: _code }], isActive: true }, { name: 1 })
+        color = await this.findOne({ $or: [{ name: _name }, { code: _code }], isActive: true }, { name: 1 })
     }
-    return Color ? true : false;
+    return color ? true : false;
 }
 
 const Color = mongoose.model('color', ColorSchema);

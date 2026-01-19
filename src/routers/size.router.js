@@ -1,8 +1,8 @@
 const express = require('express');
 const sizeRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveSize, updateSize, deleteSize, getSizeById, getAllSize} = require('../controllers/size.controller');
-
+const { authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveSize, updateSize, deleteSize, getSizeById, getAllSize } = require('../controllers/size.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 /**
  * @swagger
@@ -10,7 +10,6 @@ const { saveSize, updateSize, deleteSize, getSizeById, getAllSize} = require('..
  *  name : Size
  * description : API for managing Sizes 
  */
-
 
 
 /**
@@ -29,8 +28,7 @@ const { saveSize, updateSize, deleteSize, getSizeById, getAllSize} = require('..
  *       201:
  *         description: Size Saved Successfully
  */
-sizeRouter.post('/Save', adminAuthMiddleware, saveSize);
-
+sizeRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveSize);
 
 
 /**
@@ -49,7 +47,7 @@ sizeRouter.post('/Save', adminAuthMiddleware, saveSize);
   *       201:
   *         description: Size updated successfully.
   */
-sizeRouter.post('/Update', adminAuthMiddleware, updateSize);
+sizeRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateSize);
 /**
   * @swagger
   * /api/Size/GetAll:
@@ -72,7 +70,7 @@ sizeRouter.post('/Update', adminAuthMiddleware, updateSize);
   *               items:
   *                 type: object
   */
-sizeRouter.post('/GetAll', adminAuthMiddleware, getAllSize);
+sizeRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllSize);
 
 /**
   * @swagger
@@ -91,7 +89,7 @@ sizeRouter.post('/GetAll', adminAuthMiddleware, getAllSize);
   *       200:
   *         description: Returns Size object.
   */
-sizeRouter.get('/GetById/:id', adminAuthMiddleware, getSizeById);
+sizeRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getSizeById);
 /**
   * @swagger
   * /api/Size/Delete:
@@ -108,7 +106,7 @@ sizeRouter.get('/GetById/:id', adminAuthMiddleware, getSizeById);
   *       200:
   *         description: Size deleted successfully.
   */
-sizeRouter.post('/Delete', adminAuthMiddleware, deleteSize);
+sizeRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteSize);
 
 
 module.exports = sizeRouter;

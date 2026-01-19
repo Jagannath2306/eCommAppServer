@@ -4,59 +4,110 @@ const Joi = require('joi');
 const saveColor = async (req, res) => {
     const loggedInUser = req.session.user;
 
-    const Schema = Joi.object({
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    const schema = Joi.object({
         name: Joi.string().min(3).max(20).required(),
-        code: Joi.string().min(7).max(20).required()
+        code: Joi.string().min(2).max(10).required()
     });
 
-    const result = Schema.validate(req.body);
-    if (result.error) {
-        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
     }
 
-    const name = result.value.name;
-    const code = result.value.code;
-    const color = new Color({ name: name, code: code, createdBy: loggedInUser.id });
+    const name = value.name.trim().toLowerCase();
+    const code = value.code.trim().toUpperCase();
 
-    let isExists = await Color.isExists(name, code);
-    if (!isExists) {
-        let result = await color.save();
-        res.status(201).json({ success: true, message: "Color Saved Successfully !!" });
-    } else {
-        res.status(400).json({ success: false, message: `Color Name ${name} or Code ${code} already exists !!` });
-        return;
+    const exists = await Color.isExists(name, code);
+    if (exists) {
+        return res.status(400).json({
+            success: false,
+            message: `Color name '${name}' or code '${code}' already exists`
+        });
     }
-}
 
+    const color = new Color({
+        name,
+        code,
+        createdBy: loggedInUser.id
+    });
+
+    await color.save();
+
+    return res.status(201).json({
+        success: true,
+        message: "Color saved successfully"
+    });
+};
 
 const updateColor = async (req, res) => {
     const loggedInUser = req.session.user;
 
-    const Schema = Joi.object({
-        id: Joi.string().required(),
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    const schema = Joi.object({
+        id: Joi.string().hex().length(24).required(),
         name: Joi.string().min(3).max(20).required(),
-        code: Joi.string().min(7).max(20).required()
+        code: Joi.string().min(2).max(10).required()
     });
 
-    const result = Schema.validate(req.body);
-    if (result.error) {
-        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
     }
 
-    const name = result.value.name;
-    const code = result.value.code;
-    const colorId = result.value.id;
+    const name = value.name.trim().toLowerCase();
+    const code = value.code.trim().toUpperCase();
+    const colorId = value.id;
 
-
-    let isExists = await Color.isExists(name, code, colorId);
-    if (!isExists) {
-        await Color.findOneAndUpdate({ _id: colorId }, { ...result.value, updatedBy: loggedInUser.id });
-        res.status(201).json({ success: true, message: "Color Updated Successfully !!" });
-    } else {
-        res.status(400).json({ success: false, message: `Color Name ${name} or Code ${code} already exists !!` });
-        return;
+    const color = await Color.findById(colorId);
+    if (!color) {
+        return res.status(404).json({
+            success: false,
+            message: "Color not found"
+        });
     }
-}
+
+    const exists = await Color.isExists(name, code, colorId);
+    if (exists) {
+        return res.status(400).json({
+            success: false,
+            message: `Color name '${name}' or code '${code}' already exists`
+        });
+    }
+
+    await Color.findByIdAndUpdate(
+        colorId,
+        {
+            name,
+            code,
+            updatedBy: loggedInUser.id
+        }
+    );
+
+    return res.status(200).json({
+        success: true,
+        message: "Color updated successfully"
+    });
+};
+
 
 const getAllColors = async (req, res) => {
     const schema = Joi.object({
@@ -88,9 +139,9 @@ const getAllColors = async (req, res) => {
     return res.status(200).json({
         success: true,
         data: rows,
-         meta: {
-            page : page,
-            pageSize : limitVal,
+        meta: {
+            page: page,
+            pageSize: limitVal,
             total: count
         }
     });

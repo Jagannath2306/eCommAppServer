@@ -22,6 +22,41 @@ module.exports = {
                     }
                 }
             },
+            InsertCategory: {
+                type: "object",
+                required: ["name", "title", "imagePath"],
+                properties: {
+                    name: {
+                        type: "string",
+                    },
+                    title: {
+                        type: "string",
+                    },
+                    imagePath: {
+                        type: "string",
+                        format: "binary",
+                    }
+                }
+            },
+            UpdateCategory: {
+                type: "object",
+                required: ["id", "name", "title"],
+                properties: {
+                    id: {
+                        type: "string",
+                    },
+                    name: {
+                        type: "string",
+                    },
+                    title: {
+                        type: "string",
+                    },
+                    imagePath: {
+                        type: "string",
+                        format: "binary"
+                    }
+                }
+            },
             DeleteCategory: {
                 type: "object",
                 required: ['id'],

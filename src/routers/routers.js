@@ -21,10 +21,12 @@ const orderstatusRoute = require("./orderstatus.router");
 const paymentRoute = require("./payment.router");
 const pagePermissionRoute = require("./pagepermissionmaster.router");
 const rolePermissionRoute = require("./rolepagepermission.router");
+const productVariantRoute = require("./productvariant.router");
 
 module.exports = {
     userTypeRouter,
     userRouter,
+    productVariantRoute,
     sizeRouter,
     tagRouter,
     colorRouter,
@@ -45,5 +47,5 @@ module.exports = {
     orderstatusRoute,
     paymentRoute,
     pagePermissionRoute,
-    rolePermissionRoute
+    rolePermissionRoute,
 }

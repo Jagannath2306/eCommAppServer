@@ -1,7 +1,8 @@
 const express = require('express');
 const colorRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
+const { authMiddleware } = require('../middlewares/user.auth.middleware');
 const { saveColor, updateColor, deleteColor, getColorById, getAllColors } = require('../controllers/color.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 /**
@@ -29,8 +30,7 @@ const { saveColor, updateColor, deleteColor, getColorById, getAllColors } = requ
  *       201:
  *         description: Color Saved Successfully
  */
-colorRouter.post('/Save', adminAuthMiddleware, saveColor);
-
+colorRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveColor);
 
 
 /**
@@ -49,7 +49,7 @@ colorRouter.post('/Save', adminAuthMiddleware, saveColor);
   *       201:
   *         description: Color updated successfully.
   */
-colorRouter.post('/Update', adminAuthMiddleware, updateColor);
+colorRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateColor);
 /**
   * @swagger
   * /api/Color/GetAll:
@@ -72,7 +72,7 @@ colorRouter.post('/Update', adminAuthMiddleware, updateColor);
   *               items:
   *                 type: object
   */
-colorRouter.post('/GetAll', adminAuthMiddleware, getAllColors);
+colorRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllColors);
 
 /**
   * @swagger
@@ -91,7 +91,7 @@ colorRouter.post('/GetAll', adminAuthMiddleware, getAllColors);
   *       200:
   *         description: Returns Color object.
   */
-colorRouter.get('/GetById/:id', adminAuthMiddleware, getColorById);
+colorRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getColorById);
 
 /**
   * @swagger
@@ -109,7 +109,7 @@ colorRouter.get('/GetById/:id', adminAuthMiddleware, getColorById);
   *       200:
   *         description: Color deleted successfully.
   */
-colorRouter.post('/Delete', adminAuthMiddleware, deleteColor);
+colorRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteColor);
 
 
 module.exports = colorRouter;

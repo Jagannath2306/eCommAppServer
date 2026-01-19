@@ -2,73 +2,101 @@ const Category = require('../models/category.model');
 const Joi = require('joi');
 const path = require('path');
 const { createUploader } = require('../utils/uploader/createuploader');
+const slugify = require("slugify");
+
 
 const uploadCategory = createUploader({
     uploadPath: path.join(__dirname, '../', process.env.CATEGORY_IMAGE_PATH),
     fieldName: 'imagePath',
-    maxCount :1,
+    maxCount: 1,
 });
 
+const saveCategory = (req, res) => {
+    uploadCategory(req, res, async (err) => {
+        try {
+            if (err) {
+                return res.status(400).json({ success: false, message: err.message });
+            }
 
-const saveCategory = async (req, res) => {
-    //Handle File Upload 
-    uploadCategory(req, res, async function (err) {
-        if (err) {
-            return res.status(400).send({ success: false, message: err.message });
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Category image is required"
+                });
+            }
+
+            const loggedInUser = req.session?.user;
+            if (!loggedInUser) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized"
+                });
+            }
+
+            const schema = Joi.object({
+                name: Joi.string().min(2).max(20).required(),
+                title: Joi.string().min(2).max(20).required()
+            });
+
+            const { error, value } = schema.validate(req.body);
+            if (error) {
+                return res.status(400).json({
+                    success: false,
+                    message: error.details[0].message
+                });
+            }
+
+            const exists = await Category.isExists(value.name);
+            if (exists) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Category '${value.name}' already exists`
+                });
+            }
+
+            const imagePath = `${process.env.CATEGORY_IMAGE_PATH}/${req.file.filename}`;
+
+            const category = new Category({
+                name: value.name,
+                title: value.title,
+                slug: slugify(value.name, { lower: true, strict: true }),
+                imagePath,
+                createdBy: loggedInUser.id
+            });
+
+            await category.save();
+
+            return res.status(201).json({
+                success: true,
+                message: "Category saved successfully"
+            });
+
+        } catch (error) {
+            console.error("SaveCategory Error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
         }
-
-        if (!req.file) {
-            return res.status(400).send({ success: false, message: "No File found to upload" });
-        }
-
-        const loggedInUser = req.session.user;
-        if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
-        }
-
-        const Schema = Joi.object({
-            name: Joi.string().min(2).max(20).required(),
-            title: Joi.string().min(2).max(20).required(),
-            isSave: Joi.number().required(),
-            link: Joi.string().required(),
-            imagePath: Joi.string().required()
-        });
-
-        const filePath = `${process.env.CATEGORY_IMAGE_PATH}/${req.file.filename}`;
-        const result = Schema.validate({ ...req.body, imagePath: filePath });
-        if (result.error) {
-            return res.status(400).send({ success: false, message: result.error.details[0].message });
-        }
-
-        const category = new Category({ ...result.value, imagePath: filePath, createdBy: loggedInUser.id });
-
-        let response = await category.save();
-        return res.status(201).json({ success: true, message: "Category Saved Successfully !!" });
     });
-}
+};
+
 
 const updateCategory = async (req, res) => {
-    //Handle File Upload 
     uploadCategory(req, res, async function (err) {
         if (err) {
-            return res.status(400).send({ success: false, message: err.message });
-        }
-
-        if (!req.file) {
-            return res.status(400).send({ success: false, message: "No File found to upload" });
+            return res.status(400).json({ success: false, message: err.message });
         }
 
         const loggedInUser = req.session.user;
         if (!loggedInUser) {
-            return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+            return res.status(401).json({ success: false, message: "Unauthorized" });
         }
 
         const Schema = Joi.object({
-            id: Joi.string().required(),
-            name: Joi.string().min(2).max(20).required(),
-            title: Joi.string().min(2).max(20).required(),
-            isSave: Joi.number().required(),
-            link: Joi.string().required(),
+            id: Joi.string().hex().length(24).required(),
+            name: Joi.string().min(2).max(50).required(),
+            title: Joi.string().min(2).max(100).required(),
             imagePath: Joi.string().required()
         });
 
@@ -78,19 +106,36 @@ const updateCategory = async (req, res) => {
             return res.status(400).send({ success: false, message: result.error.details[0].message });
         }
 
-        const name = result.value.name;
-        const categoryId = result.value.id;
-        const category = await Category.findOneAndUpdate({ _id: categoryId }, { ...result.value, imagePath: filePath, updatedBy: loggedInUser.id });
+        const { id, name } = result.value;
 
+        const category = await Category.findById(id);
         if (!category) {
-            return res.status(400).send({ success: false, message: "Something Went Wrong while updating Category" });
+            return res.status(404).json({
+                success: false,
+                message: "Category not found"
+            });
         }
 
-        return res.status(201).json({ success: true, message: "Category Updated Successfully !!" });
+        const exists = await Category.isExists(name, id);
+        if (exists) {
+            return res.status(400).json({
+                success: false,
+                message: `Category '${name}' already exists`
+            });
+        }
+
+        const categoryUpdate = await Category.findOneAndUpdate({ _id: id }, {
+            ...result.value,
+            slug: slugify(name, { lower: true, strict: true }),
+            imagePath: filePath,
+            updatedBy: loggedInUser.id
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Category updated successfully"
+        });
     });
 }
-
-
 
 const getAllCategories = async (req, res) => {
     const schema = Joi.object({
@@ -167,4 +212,20 @@ const deleteCategory = async (req, res) => {
     }
 }
 
-module.exports = { saveCategory, updateCategory, deleteCategory, getCategoryById, getAllCategories }
+const getCategories = async (req, res) => {
+
+    const rows = await Category.find({ isActive: true }, { _id: 1, name: 1 })
+    return res.status(200).json({
+        success: true,
+        data: rows,
+        message: "Categories fetched successfully"
+    });
+}
+module.exports = {
+    saveCategory,
+    updateCategory,
+    deleteCategory,
+    getCategoryById,
+    getAllCategories,
+    getCategories
+};

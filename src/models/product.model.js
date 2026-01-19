@@ -1,71 +1,53 @@
 const mongoose = require('mongoose');
 
-const ProductSchema = mongoose.Schema({
+const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'Name is Required !!']
+        required: true,
+        trim: true
     },
     code: {
         type: String,
-        required: [true, 'Code is Required !!']
+        required: true,
+        unique: true,
+        uppercase: true,
+        trim: true
     },
     title: {
         type: String,
-        required: [true, 'Title is Required !!']
+        required: true
     },
     price: {
-        type: String,
-        required: [true, 'Price is Required !!']
+        type: Number,
+        required: true,
+        min: 0
     },
     salePrice: {
-        type: String,
-        required: [true, 'Sale Price is Required !!']
+        type: Number,
+        min: 0
     },
     shortDetails: {
         type: String,
-        required: [true, 'Short Details is Required !!']
+        required: true
     },
     description: {
         type: String,
-        required: [true, 'Description is Required !!']
+        required: true
     },
-    quantity: {
-        type: String,
-        required: [true, 'Quantity is Required !!']
-    },
-    discount: {
-        type: Number,
-    },
-    isNewItem: {
-        type: Boolean,
-    },
-    isSale: {
-        type: Boolean,
-    },
-    categoryId: {
+    categoryIds: [{
         type: mongoose.Types.ObjectId,
         ref: 'category',
         required: true
-    },
-    tagId: {
+    }],
+    tagIds: [{
         type: mongoose.Types.ObjectId,
         ref: 'tag',
+         required: true
+    }],
+    imagePaths: [{
+        type: String,
         required: true
-    },
-    colorId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'color',
-        required: true
-    },
-    sizeId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'size',
-        required: true
-    },
-    imagePaths: {
-        type: Array,
-        required: [true, 'Image Path is Required !!']
-    },
+    }],
     isActive: {
         type: Boolean,
         default: true
@@ -79,26 +61,35 @@ const ProductSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'usermaster'
     }
-}, {
-    // timestamps: true
-    timestamps: {
-        createdAt: 'createdOn',
-        updatedAt: 'updatedOn'
-    }
+},
+    {
+        timestamps: {
+            createdAt: 'createdOn',
+            updatedAt: 'updatedOn'
+        },
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
+    });
+
+// 👇 ADD VIRTUAL HERE
+ProductSchema.virtual('discount').get(function () {
+    if (!this.salePrice) return 0;
+    return Math.round(((this.price - this.salePrice) / this.price) * 100);
 });
 
-ProductSchema.statics.isExists = async function isExists(_name, _code, id) {
-    let product;
+ProductSchema.statics.isExists = async function (name, code, id = null) {
+    const query = {
+        isActive: true,
+        $or: [{ name }, { code }]
+    };
+
     if (id) {
-        // Check on Update
-        product = await this.findOne({ $or: [{ name: _name }, { code: _code }], isActive: true, _id: { $ne: id } }, { name: 1 })
-    } else {
-        //Check on Insert
-        product = await this.findOne({ $or: [{ name: _name }, { code: _code }], isActive: true }, { name: 1 })
+        query._id = { $ne: id };
     }
-    return product ? true : false;
-}
+
+    return !!(await this.exists(query));
+};
 
 const Product = mongoose.model('product', ProductSchema);
 
-module.exports =  Product;
+module.exports = Product;

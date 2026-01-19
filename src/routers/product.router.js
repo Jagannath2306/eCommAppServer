@@ -1,7 +1,8 @@
 const express = require('express');
 const productRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveProduct, updateProduct, deleteProduct, getProductById, getAllProducts, getProductByCategoryId } = require('../controllers/product.controller');
+const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveProduct, updateProduct, deleteProduct, getProductById, getAllProducts, getProductByCategoryId, getProducts } = require('../controllers/product.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 /**
@@ -15,9 +16,8 @@ const { saveProduct, updateProduct, deleteProduct, getProductById, getAllProduct
  * @swagger
  * /api/product/Save:
  *   post:
- *     tags: [Product]
  *     summary: Save new product
- *     description: Upload exactly 5 product images using imagePaths
+ *     tags: [Product]
  *     requestBody:
  *       required: true
  *       content:
@@ -29,65 +29,39 @@ const { saveProduct, updateProduct, deleteProduct, getProductById, getAllProduct
  *               - code
  *               - title
  *               - price
- *               - salePrice
  *               - shortDetails
  *               - description
- *               - quantity
- *               - discount
- *               - isNewItem
- *               - isSale
- *               - categoryId
- *               - tagId
- *               - colorId
- *               - sizeId
+ *               - categoryIds
+ *               - tagIds
  *               - imagePaths
  *             properties:
  *               name:
  *                 type: string
- *                 example: Shoes
  *               code:
  *                 type: string
- *                 example: SHOE001
  *               title:
  *                 type: string
- *                 example: Running Shoes
  *               price:
  *                 type: number
- *                 example: 2000
  *               salePrice:
  *                 type: number
- *                 example: 1500
  *               shortDetails:
  *                 type: string
- *                 example: Lightweight running shoes
  *               description:
  *                 type: string
- *                 example: Comfortable running shoes for daily use
- *               quantity:
- *                 type: number
- *                 example: 10
- *               discount:
- *                 type: number
- *                 example: 25
- *               isNewItem:
- *                 type: boolean
- *               isSale:
- *                 type: boolean
- *               categoryId:
- *                 type: string 
- *               tagId:
- *                 type: string
- *               colorId:
- *                 type: string
- *               sizeId:
- *                 type: string
+ *               categoryIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               tagIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *               imagePaths:
  *                 type: array
- *                 description: Upload exactly 5 product images
- *                 minItems: 5
- *                 maxItems: 5
  *                 items:
- *                   type: file
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       201:
  *         description: Product created successfully
@@ -95,8 +69,7 @@ const { saveProduct, updateProduct, deleteProduct, getProductById, getAllProduct
  *         description: Validation or upload error
  */
 
-
-productRouter.post('/Save', adminAuthMiddleware, saveProduct);
+productRouter.post('/Save', authMiddleware, checkPermission('PRODUCT_LIST', "create"), saveProduct);
 
 /**
  * @swagger
@@ -104,7 +77,6 @@ productRouter.post('/Save', adminAuthMiddleware, saveProduct);
  *   post:
  *     summary: Update Existing Product
  *     tags: [Product]
- *     description: Fields marked as required (*) must be provided
  *     requestBody:
  *       required: true
  *       content:
@@ -185,7 +157,7 @@ productRouter.post('/Save', adminAuthMiddleware, saveProduct);
  *          description: Validation or upload error
 */
 
-productRouter.post('/Update', adminAuthMiddleware, updateProduct);
+productRouter.post('/Update', authMiddleware,checkPermission("PRODUCT_LIST", "edit"), updateProduct);
 /**
   * @swagger
   * /api/Product/GetAll:
@@ -208,26 +180,35 @@ productRouter.post('/Update', adminAuthMiddleware, updateProduct);
   *               items:
   *                 type: object
   */
-productRouter.post('/GetAll', adminAuthMiddleware, getAllProducts);
+productRouter.post('/GetAll', authMiddleware,checkPermission("PRODUCT_LIST", "view"), getAllProducts);
 
 /**
-  * @swagger
-  * /api/Product/GetById/{id}:
-  *   get:
-  *     summary: Get product by Id
-  *     tags: [Product]
-  *     parameters:
-  *       - in: path
-  *         name: id
-  *         required: true
-  *         description: Product Id
-  *         schema:
-  *           type: string
-  *     responses:
-  *       200:
-  *         description: Returns Product object.
-  */
-productRouter.get('/GetById/:id', adminAuthMiddleware, getProductById);
+ * @swagger
+ * /api/Product/GetById:
+ *   post:
+ *     summary: Get product by Id
+ *     tags: [Product]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Returns Product object
+ *       400:
+ *         description: Invalid product id
+ *       404:
+ *         description: Product not found
+ */
+
+productRouter.post('/GetById', authMiddleware,checkPermission("PRODUCT_LIST", "view"), getProductById);
 
 /**
   * @swagger
@@ -245,7 +226,7 @@ productRouter.get('/GetById/:id', adminAuthMiddleware, getProductById);
   *       200:
   *         description: Product deleted successfully.
   */
-productRouter.post('/Delete', adminAuthMiddleware, deleteProduct);
+productRouter.put('/Delete', authMiddleware,checkPermission("PRODUCT_LIST", "delete"), deleteProduct);
 
 /**
   * @swagger
@@ -264,6 +245,18 @@ productRouter.post('/Delete', adminAuthMiddleware, deleteProduct);
   *       200:
   *         description: Returns Product object.
   */
-productRouter.get('/GetProductByCategoryId/:categoryId', adminAuthMiddleware, getProductByCategoryId);
+productRouter.get('/GetProductByCategoryId/:categoryId', authMiddleware,checkPermission("PRODUCT_LIST", "view"), getProductByCategoryId);
+
+/**
+ * @swagger
+ * /api/Product/GetProducts:
+ *   get:
+ *     summary: Get all products
+ *     tags: [Product]
+ *     responses:
+ *       200:
+ *         description: Returns list of products
+ */
+productRouter.get('/GetProducts', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getProducts);
 
 module.exports = productRouter;

@@ -1,7 +1,8 @@
 const express = require('express');
 const tagRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveTag, updateTag, deleteTag, getTagById, getAllTags} = require('../controllers/tag.controller');
+const { authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveTag, updateTag, deleteTag, getTagById, getAllTags, getTags } = require('../controllers/tag.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 /**
@@ -10,8 +11,6 @@ const { saveTag, updateTag, deleteTag, getTagById, getAllTags} = require('../con
  *  name : Tag
  * description : API for managing Tags
  */
-
-
 
 /**
  * @swagger
@@ -29,8 +28,7 @@ const { saveTag, updateTag, deleteTag, getTagById, getAllTags} = require('../con
  *       201:
  *         description: Tag Saved Successfully
  */
-tagRouter.post('/Save', adminAuthMiddleware, saveTag);
-
+tagRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveTag);
 
 
 /**
@@ -49,7 +47,7 @@ tagRouter.post('/Save', adminAuthMiddleware, saveTag);
   *       201:
   *         description: Tag updated successfully.
   */
-tagRouter.post('/Update', adminAuthMiddleware, updateTag);
+tagRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateTag);
 /**
   * @swagger
   * /api/Tag/GetAll:
@@ -72,7 +70,7 @@ tagRouter.post('/Update', adminAuthMiddleware, updateTag);
   *               items:
   *                 type: object
   */
-tagRouter.post('/GetAll', adminAuthMiddleware, getAllTags);
+tagRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllTags);
 
 /**
   * @swagger
@@ -91,7 +89,7 @@ tagRouter.post('/GetAll', adminAuthMiddleware, getAllTags);
   *       200:
   *         description: Returns Tag object.
   */
-tagRouter.get('/GetById/:id', adminAuthMiddleware, getTagById);
+tagRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTagById);
 /**
   * @swagger
   * /api/Tag/Delete:
@@ -108,7 +106,21 @@ tagRouter.get('/GetById/:id', adminAuthMiddleware, getTagById);
   *       200:
   *         description: Tag deleted successfully.
   */
-tagRouter.post('/Delete', adminAuthMiddleware, deleteTag);
+tagRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteTag);
 
+/**
+ * @swagger
+ * /api/Tag/GetTags:
+ *   get:
+ *     tags: [Tag]
+ *     summary: Get all tags
+ *     description: Returns all tags
+ *     responses:
+ *       200:
+ *         description: Success
+ *       401:
+ *         description: Unauthorized
+ */
 
+tagRouter.get('/GetTags', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTags);
 module.exports = tagRouter;

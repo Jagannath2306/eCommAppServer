@@ -4,57 +4,112 @@ const Joi = require('joi');
 const saveTag = async (req, res) => {
     const loggedInUser = req.session.user;
 
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
     const Schema = Joi.object({
         name: Joi.string().min(2).max(20).required()
     });
 
-    const result = Schema.validate(req.body);
-    if (result.error) {
-        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    const { error, value } = Schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
     }
 
-    const name = result.value.name;
-    const tag = new Tag({ name: name, createdBy: loggedInUser.id });
+    const name = value.name.trim().toLowerCase();
 
-    let isExists = await Tag.isExists(name);
-    if (!isExists) {
-        let result = await tag.save();
-        res.status(201).json({ success: true, message: "Tag Saved Successfully !!" });
-    } else {
-      return res.status(400).json({ success: false, message: `Tag Name ${name} already exists !!` });
+    const isExists = await Tag.isExists(name);
+    if (isExists) {
+        return res.status(400).json({
+            success: false,
+            message: `Tag name "${name}" already exists`
+        });
     }
-}
+
+    const tag = new Tag({
+        name,
+        createdBy: loggedInUser.id
+    });
+
+    await tag.save();
+
+    return res.status(201).json({
+        success: true,
+        message: 'Tag saved successfully'
+    });
+};
 
 
 const updateTag = async (req, res) => {
     const loggedInUser = req.session.user;
 
-    const Schema = Joi.object({
-        id: Joi.string().required(),
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized user"
+        });
+    }
+
+    const schema = Joi.object({
+        id: Joi.string().hex().length(24).required(),
         name: Joi.string().min(2).max(20).required()
     });
 
-    const result = Schema.validate(req.body);
-    if (result.error) {
-        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
     }
 
-    const name = result.value.name;
-    const tagId = result.value.id;
+    const tagId = value.id;
+    const name = value.name.trim().toLowerCase();
 
-
-    let isExists = await Tag.isExists(name, tagId);
-    if (!isExists) {
-        await Tag.findOneAndUpdate({ _id: tagId }, { name: name, updatedBy: loggedInUser.id });
-        res.status(201).json({ success: true, message: "Tag Updated Successfully !!" });
-    } else {
-        return res.status(400).json({ success: false, message: `Tag Name ${name} already exists !!` });
+    const exists = await Tag.isExists(name, tagId);
+    if (exists) {
+        return res.status(400).json({
+            success: false,
+            message: `Tag name "${name}" already exists`
+        });
     }
-}
+
+    const updated = await Tag.findOneAndUpdate(
+        { _id: tagId },
+        { name, updatedBy: loggedInUser.id },
+        { new: true }
+    );
+
+    if (!updated) {
+        return res.status(404).json({
+            success: false,
+            message: "Tag not found"
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Tag updated successfully"
+    });
+};
 
 
 const deleteTag = async (req, res) => {
     const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized user"
+        });
+    }
 
     const Schema = Joi.object({
         id: Joi.string().required()
@@ -119,12 +174,20 @@ const getAllTags = async (req, res) => {
     return res.status(200).json({
         success: true,
         data: rows,
-         meta: {
-            page : page,
-            pageSize : limitVal,
+        meta: {
+            page: page,
+            pageSize: limitVal,
             total: count
         }
     });
 }
 
-module.exports = { saveTag, updateTag, deleteTag, getTagById, getAllTags }
+const getTags = async (req, res) => {
+    const tags = await Tag.find({ isActive: true }, { _id: 1, name: 1 })
+    return res.status(200).json({
+        success: true,
+        data: tags,
+        message: "Tags fetched successfully"
+    });
+}
+module.exports = { saveTag, updateTag, deleteTag, getTagById, getAllTags, getTags }

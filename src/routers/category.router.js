@@ -1,7 +1,8 @@
 const express = require('express');
 const categoryRouter = express.Router();
-const { adminAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveCategory, updateCategory, deleteCategory, getCategoryById, getAllCategories } = require('../controllers/category.controller');
+const { adminAuthMiddleware, authMiddleware } = require('../middlewares/user.auth.middleware');
+const { saveCategory, updateCategory, deleteCategory, getCategoryById, getAllCategories, getCategories } = require('../controllers/category.controller');
+const checkPermission = require('../middlewares/role.auth.middleware');
 
 
 /**
@@ -22,33 +23,16 @@ const { saveCategory, updateCategory, deleteCategory, getCategoryById, getAllCat
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - title
- *               - isSave
- *               - link
- *               - imagePath
- *             properties:
- *               name:
- *                 type: string
- *               title:
- *                type: string
- *               isSave:
- *                type: number
- *               link:
- *                 type: string
- *               imagePath:
- *                 type: file
+ *             $ref: '#/components/schemas/InsertCategory'
  *     responses:
  *       201:
- *         description: Brand logo saved successfully
+ *         description: Category saved successfully
  *       400:
  *         description: Validation or upload error
  *       401:
  *         description: Unauthorized
  */
-categoryRouter.post('/Save', adminAuthMiddleware, saveCategory);
+categoryRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveCategory);
 
 /**
  * @swagger
@@ -61,37 +45,17 @@ categoryRouter.post('/Save', adminAuthMiddleware, saveCategory);
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             required:
- *               - id
- *               - name
- *               - title
- *               - isSave
- *               - link
- *               - imagePath
- *             properties:
- *               id:
- *                 type: string
- *               name:
- *                 type: string
- *               title:
- *                type: string
- *               isSave:
- *                type: number
- *               link:
- *                 type: string
- *               imagePath:
- *                 type: file
+ *             $ref: '#/components/schemas/UpdateCategory'
  *     responses:
  *       201:
- *         description: BrandLogo updated successfully
+ *         description: Category updated successfully
  *       400:
  *         description: Validation or upload error
  *       401:
  *         description: Unauthorized
  */
+categoryRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateCategory);
 
-categoryRouter.post('/Update', adminAuthMiddleware, updateCategory);
 /**
   * @swagger
   * /api/Category/GetAll:
@@ -114,7 +78,7 @@ categoryRouter.post('/Update', adminAuthMiddleware, updateCategory);
   *               items:
   *                 type: object
   */
-categoryRouter.post('/GetAll', adminAuthMiddleware, getAllCategories);
+categoryRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllCategories);
 
 /**
   * @swagger
@@ -133,7 +97,23 @@ categoryRouter.post('/GetAll', adminAuthMiddleware, getAllCategories);
   *       200:
   *         description: Returns Category object.
   */
-categoryRouter.get('/GetById/:id', adminAuthMiddleware, getCategoryById);
+categoryRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategoryById);
+
+/**
+ * @swagger
+ * /api/Category/GetCategories:
+ *   get:
+ *     tags: [Category]
+ *     summary: Get all categories
+ *     description: Returns all categories
+ *     responses:
+ *       200:
+ *         description: Success
+ *       401:
+ *         description: Unauthorized
+ */
+
+categoryRouter.get('/GetCategories', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategories);
 
 /**
   * @swagger
@@ -151,7 +131,7 @@ categoryRouter.get('/GetById/:id', adminAuthMiddleware, getCategoryById);
   *       200:
   *         description: Category deleted successfully.
   */
-categoryRouter.post('/Delete', adminAuthMiddleware, deleteCategory);
+categoryRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteCategory);
 
 
 module.exports = categoryRouter;

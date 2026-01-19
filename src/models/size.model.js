@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const SizeSchema = mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'Name is Required !!']
+        required: [true, 'Name is Required !!'],
+        trim: true,
+        uppercase: true
     },
     isActive: {
         type: Boolean,
@@ -19,24 +21,25 @@ const SizeSchema = mongoose.Schema({
         ref: 'usermaster'
     }
 }, {
-    // timestamps: true
     timestamps: {
         createdAt: 'createdOn',
         updatedAt: 'updatedOn'
     }
 });
 
+SizeSchema.index({ name: 1, isActive: 1 });
+
 SizeSchema.statics.isExists = async function isExists(_name, id) {
-    let Size;
+    let size;
 
     if (id) {
         // Check on Update
-        Size = await this.findOne({ name: _name, isActive: true, _id: { $ne: id } }, { name: 1 })
+        size = await this.findOne({ name: _name, isActive: true, _id: { $ne: id } }, { name: 1 })
     } else {
         //Check on Insert
-        Size = await this.findOne({ name: _name, isActive: true }, { name: 1 })
+        size = await this.findOne({ name: _name, isActive: true }, { name: 1 })
     }
-    return Size ? true : false;
+    return size ? true : false;
 }
 
 const Size = mongoose.model('size', SizeSchema);
