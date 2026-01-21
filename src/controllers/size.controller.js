@@ -130,8 +130,17 @@ const deleteSize = async (req, res) => {
 }
 
 const getSizeById = async (req, res) => {
-    const id = req.params.id;
-
+    const Schema = Joi.object({
+        id: Joi.string().required(),
+    });
+    const { error, value } = Schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
+    }
+    const { id } = value;
     const size = await Size.findOne({ _id: id, isActive: true })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
@@ -179,5 +188,21 @@ const getAllSize = async (req, res) => {
         }
     });
 }
+const getSizeList = async (req, res) => {
+    const loggedInUser = req.session.user;
 
-module.exports = { saveSize, updateSize, deleteSize, getSizeById, getAllSize }
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+    const rows = await Size.find({ isActive: true })
+    return res.status(200).json({
+        success: true,
+        data: rows,
+        message: 'Size List Fetched Successfully !!'
+    });
+}
+
+module.exports = { saveSize, updateSize, deleteSize, getSizeById, getAllSize, getSizeList }

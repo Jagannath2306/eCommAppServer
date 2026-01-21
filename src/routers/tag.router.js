@@ -1,7 +1,7 @@
 const express = require('express');
 const tagRouter = express.Router();
 const { authMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveTag, updateTag, deleteTag, getTagById, getAllTags, getTags } = require('../controllers/tag.controller');
+const { saveTag, updateTag, deleteTag, getTagById, getAllTags, getTags, getTagList } = require('../controllers/tag.controller');
 const checkPermission = require('../middlewares/role.auth.middleware');
 
 
@@ -73,23 +73,27 @@ tagRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"
 tagRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllTags);
 
 /**
-  * @swagger
-  * /api/Tag/GetById/{id}:
-  *   get:
-  *     summary: Get tag by Id
-  *     tags: [Tag]
-  *     parameters:
-  *       - in: path
-  *         name: id
-  *         required: true
-  *         description: Tag Id
-  *         schema:
-  *           type: string
-  *     responses:
-  *       200:
-  *         description: Returns Tag object.
-  */
-tagRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTagById);
+ * @swagger
+ * /api/Tag/GetById:
+ *   post:
+ *     summary: Get tag by Id
+ *     tags: [Tag]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: Tag Id
+ *     responses:
+ *       200:
+ *         description: Returns Tag object.
+ */
+
+tagRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTagById);
 /**
   * @swagger
   * /api/Tag/Delete:
@@ -106,7 +110,7 @@ tagRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "v
   *       200:
   *         description: Tag deleted successfully.
   */
-tagRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteTag);
+tagRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteTag);
 
 /**
  * @swagger
@@ -123,4 +127,21 @@ tagRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delet
  */
 
 tagRouter.get('/GetTags', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTags);
+
+
+/**
+ * @swagger
+ * /api/Tag/GetTagList:
+ *   get:
+ *     tags: [Tag]
+ *     summary: Get all tags
+ *     description: Returns all tags
+ *     responses:
+ *       200:
+ *         description: Success
+ *       401:
+ *         description: Unauthorized
+ */
+
+tagRouter.get('/GetTagList', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTagList);
 module.exports = tagRouter;

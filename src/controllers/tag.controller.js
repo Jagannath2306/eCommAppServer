@@ -132,7 +132,27 @@ const deleteTag = async (req, res) => {
 }
 
 const getTagById = async (req, res) => {
-    const id = req.params.id;
+    const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
+    const Schema = Joi.object({
+        id: Joi.string().required()
+    });
+
+    const { error, value } = Schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
+    }
+    const { id } = value;
 
     const tag = await Tag.findOne({ _id: id, isActive: true })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
@@ -183,6 +203,15 @@ const getAllTags = async (req, res) => {
 }
 
 const getTags = async (req, res) => {
+    const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
     const tags = await Tag.find({ isActive: true }, { _id: 1, name: 1 })
     return res.status(200).json({
         success: true,
@@ -190,4 +219,22 @@ const getTags = async (req, res) => {
         message: "Tags fetched successfully"
     });
 }
-module.exports = { saveTag, updateTag, deleteTag, getTagById, getAllTags, getTags }
+
+const getTagList = async (req, res) => {
+    const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
+    const tags = await Tag.find({ isActive: true })
+    return res.status(200).json({
+        success: true,
+        data: tags,
+        message: "Tags fetched successfully"
+    });
+}
+module.exports = { saveTag, updateTag, deleteTag, getTagById, getAllTags, getTags, getTagList }

@@ -1,7 +1,7 @@
 const express = require('express');
 const colorRouter = express.Router();
 const { authMiddleware } = require('../middlewares/user.auth.middleware');
-const { saveColor, updateColor, deleteColor, getColorById, getAllColors } = require('../controllers/color.controller');
+const { saveColor, updateColor, deleteColor, getColorById, getAllColors, getColorList } = require('../controllers/color.controller');
 const checkPermission = require('../middlewares/role.auth.middleware');
 
 
@@ -50,6 +50,8 @@ colorRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "creat
   *         description: Color updated successfully.
   */
 colorRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateColor);
+
+
 /**
   * @swagger
   * /api/Color/GetAll:
@@ -75,23 +77,26 @@ colorRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edi
 colorRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllColors);
 
 /**
-  * @swagger
-  * /api/Color/GetById/{id}:
-  *   get:
-  *     summary: Get color by Id
-  *     tags: [Color]
-  *     parameters:
-  *       - in: path
-  *         name: id
-  *         required: true
-  *         description: Color Id
-  *         schema:
-  *           type: string
-  *     responses:
-  *       200:
-  *         description: Returns Color object.
-  */
-colorRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getColorById);
+ * @swagger
+ * /api/Color/GetById:
+ *   post:
+ *     summary: Get color by Id
+ *     tags: [Color]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: Color Id
+ *     responses:
+ *       200:
+ *         description: Returns Color object.
+ */
+colorRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getColorById);
 
 /**
   * @swagger
@@ -109,7 +114,20 @@ colorRouter.get('/GetById/:id', authMiddleware, checkPermission("PRODUCT_LIST", 
   *       200:
   *         description: Color deleted successfully.
   */
-colorRouter.post('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteColor);
+colorRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteColor);
+
+
+/**
+  * @swagger
+  * /api/Color/GetColorList:
+  *   post:
+  *     summary: Get All Colors
+  *     tags: [Color]
+  *     responses:
+  *       200:
+  *         description: Success
+  */
+colorRouter.get('/GetColorList', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getColorList);
 
 
 module.exports = colorRouter;
