@@ -148,8 +148,27 @@ const getAllColors = async (req, res) => {
 }
 
 const getColorById = async (req, res) => {
-    const id = req.params.id;
+    const loggedInUser = req.session.user;
 
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    const schema = Joi.object({
+        id: Joi.string().required()
+    });
+
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message
+        });
+    }
+const { id } = value;
     const color = await Color.findOne({ _id: id, isActive: true })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
@@ -184,4 +203,22 @@ const deleteColor = async (req, res) => {
     }
 }
 
-module.exports = { saveColor, updateColor, deleteColor, getColorById, getAllColors }
+const getColorList = async (req, res) => {
+   
+ const loggedInUser = req.session.user;
+ if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    const rows = await Color.find({ isActive: true })
+    return res.status(200).json({
+        success: true,
+        data: rows,
+        message: "Color list fetched successfully"
+    });
+}
+
+module.exports = { saveColor, updateColor, deleteColor, getColorById, getAllColors,getColorList }
