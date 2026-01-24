@@ -7,6 +7,11 @@ const SizeSchema = mongoose.Schema({
         trim: true,
         uppercase: true
     },
+    code: {
+        type: String,
+        required: [true, 'Code is Required !!'],
+        uppercase: true
+    },
     isActive: {
         type: Boolean,
         default: true

@@ -12,7 +12,8 @@ const saveSize = async (req, res) => {
     }
 
     const Schema = Joi.object({
-        name: Joi.string().min(1).max(20).required()
+        name: Joi.string().min(1).max(20).required(),
+        code: Joi.string().min(1).max(4).required(),
     });
 
     const { error, value } = Schema.validate(req.body);
@@ -24,6 +25,7 @@ const saveSize = async (req, res) => {
     }
 
     const name = value.name.trim().toUpperCase();
+    const code = value.code.toUpperCase();
 
     const isExists = await Size.isExists(name);
     if (isExists) {
@@ -35,6 +37,7 @@ const saveSize = async (req, res) => {
 
     await new Size({
         name,
+        code,
         createdBy: loggedInUser.id
     }).save();
 
@@ -56,7 +59,8 @@ const updateSize = async (req, res) => {
 
     const Schema = Joi.object({
         id: Joi.string().hex().length(24).required(),
-        name: Joi.string().min(2).max(20).required()
+        name: Joi.string().min(1).max(20).required(),
+        code: Joi.string().min(1).max(4).required(),
     });
 
     const { error, value } = Schema.validate(req.body);
@@ -69,6 +73,7 @@ const updateSize = async (req, res) => {
 
     const sizeId = value.id;
     const name = value.name.trim().toUpperCase();
+    const code = value.code.toUpperCase();
 
     const isExists = await Size.isExists(name, sizeId);
     if (isExists) {
@@ -80,7 +85,7 @@ const updateSize = async (req, res) => {
 
     const updated = await Size.findOneAndUpdate(
         { _id: sizeId },
-        { name, updatedBy: loggedInUser.id },
+        { name, code, updatedBy: loggedInUser.id },
         { new: true }
     );
 

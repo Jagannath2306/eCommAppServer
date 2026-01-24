@@ -1,9 +1,9 @@
 module.exports = {
     components: {
         schemas: {
-             InsertPageMaster: {
+            InsertPageMaster: {
                 type: "object",
-                required: ['moduleId', 'subModuleId', 'name', 'icon', 'url', 'defaultActive', 'menuRank'],
+                required: ['moduleId', 'subModuleId', 'name', 'icon', 'url', 'defaultActive', 'menuRank', "pageCode"],
                 properties: {
                     moduleId: { type: "string" },
                     subModuleId: { type: "string" },
@@ -11,12 +11,13 @@ module.exports = {
                     icon: { type: "string" },
                     url: { type: "string" },
                     defaultActive: { type: "boolean" },
-                    menuRank: { type: "number" }
+                    menuRank: { type: "number" },
+                    pageCode: { type: "string" }
                 }
             },
             UpdatePageMaster: {
                 type: "object",
-                required: ['id', 'moduleId', 'subModuleId', 'name', 'icon', 'url', 'defaultActive', 'menuRank'],
+                required: ['id', 'moduleId', 'subModuleId', 'name', 'icon', 'url', 'defaultActive', 'menuRank', 'pageCode'],
                 properties: {
                     id: { type: "string" },
                     moduleId: { type: "string" },
@@ -25,7 +26,8 @@ module.exports = {
                     icon: { type: "string" },
                     url: { type: "string" },
                     defaultActive: { type: "boolean" },
-                    menuRank: { type: "number" }
+                    menuRank: { type: "number" },
+                    pageCode: { type: "string" }
                 }
             },
             GetAllPageMasters: {
@@ -58,7 +60,7 @@ module.exports = {
             },
             GetPageByModuleIdBySubModuleIdByUserType: {
                 type: "object",
-                required: ['moduleId','subModuleId','userTypeId'],
+                required: ['moduleId', 'subModuleId', 'userTypeId'],
                 properties: {
                     moduleId: { type: "string" },
                     subModuleId: { type: "string" },

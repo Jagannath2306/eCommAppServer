@@ -28,7 +28,7 @@ const checkPermission = require('../middlewares/role.auth.middleware');
  *       201:
  *         description: Tag Saved Successfully
  */
-tagRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveTag);
+tagRouter.post('/Save', authMiddleware, checkPermission("TAG_LIST", "create"), saveTag);
 
 
 /**
@@ -47,7 +47,7 @@ tagRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"
   *       201:
   *         description: Tag updated successfully.
   */
-tagRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateTag);
+tagRouter.post('/Update', authMiddleware, checkPermission("TAG_LIST", "edit"), updateTag);
 /**
   * @swagger
   * /api/Tag/GetAll:
@@ -70,7 +70,7 @@ tagRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"
   *               items:
   *                 type: object
   */
-tagRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllTags);
+tagRouter.post('/GetAll', authMiddleware, checkPermission("TAG_LIST", "view"), getAllTags);
 
 /**
  * @swagger
@@ -93,7 +93,7 @@ tagRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"
  *         description: Returns Tag object.
  */
 
-tagRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTagById);
+tagRouter.post('/GetById', authMiddleware, checkPermission("TAG_LIST", "view"), getTagById);
 /**
   * @swagger
   * /api/Tag/Delete:
@@ -110,7 +110,7 @@ tagRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view
   *       200:
   *         description: Tag deleted successfully.
   */
-tagRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteTag);
+tagRouter.put('/Delete', authMiddleware, checkPermission("TAG_LIST", "delete"), deleteTag);
 
 /**
  * @swagger
@@ -126,7 +126,7 @@ tagRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete
  *         description: Unauthorized
  */
 
-tagRouter.get('/GetTags', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTags);
+tagRouter.get('/GetTags', authMiddleware, checkPermission("TAG_LIST", "view"), getTags);
 
 
 /**
@@ -143,5 +143,5 @@ tagRouter.get('/GetTags', authMiddleware, checkPermission("PRODUCT_LIST", "view"
  *         description: Unauthorized
  */
 
-tagRouter.get('/GetTagList', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getTagList);
+tagRouter.get('/GetTagList', authMiddleware, checkPermission("TAG_LIST", "view"), getTagList);
 module.exports = tagRouter;

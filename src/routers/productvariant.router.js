@@ -6,7 +6,8 @@ const {
     updateProductVariant,
     getAllProductVariant,
     getProductVariantById,
-    deleteProductVariant
+    deleteProductVariant,
+    getVariants
 } = require('../controllers/productvariant.controller');
 const checkPermission = require('../middlewares/role.auth.middleware');
 
@@ -36,7 +37,7 @@ const checkPermission = require('../middlewares/role.auth.middleware');
  *       201:
  *         description: Product Variant Saved Successfully
  */
-productVariantRouter.post('/Save', authMiddleware,checkPermission("PRODUCT_LIST","create"), saveProductVariant);
+productVariantRouter.post('/Save', authMiddleware,checkPermission("VARIANT_LIST","create"), saveProductVariant);
 
 
 /**
@@ -55,7 +56,7 @@ productVariantRouter.post('/Save', authMiddleware,checkPermission("PRODUCT_LIST"
   *       201:
   *         description: Product Variant updated successfully.
   */
-productVariantRouter.post('/Update', authMiddleware,checkPermission("PRODUCT_LIST","edit"), updateProductVariant);
+productVariantRouter.post('/Update', authMiddleware,checkPermission("VARIANT_LIST","edit"), updateProductVariant);
 /**
   * @swagger
   * /api/ProductVariant/GetAll:
@@ -78,26 +79,32 @@ productVariantRouter.post('/Update', authMiddleware,checkPermission("PRODUCT_LIS
   *               items:
   *                 type: object
   */
-productVariantRouter.post('/GetAll', authMiddleware,checkPermission("PRODUCT_LIST","view"), getAllProductVariant);
+productVariantRouter.post('/GetAll', authMiddleware,checkPermission("VARIANT_LIST","view"), getAllProductVariant);
 
 /**
-  * @swagger
-  * /api/ProductVariant/GetById/{id}:
-  *   get:
-  *     summary: Get ProductVariant by Id
-  *     tags: [ProductVariant]
-  *     parameters:
-  *       - in: path
-  *         name: id
-  *         required: true
-  *         description: Product Variant Id
-  *         schema:
-  *           type: string
-  *     responses:
-  *       200:
-  *         description: Returns Product Variant object.
-  */
-productVariantRouter.get('/GetById/:id', authMiddleware,checkPermission("PRODUCT_LIST","view"), getProductVariantById);
+ * @swagger
+ * /api/ProductVariant/GetById:
+ *   post:
+ *     summary: Get ProductVariant by Id
+ *     tags: [ProductVariant]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: Product Variant Id
+ *             required:
+ *               - id
+ *     responses:
+ *       200:
+ *         description: Returns Product Variant object.
+ */
+
+productVariantRouter.post('/GetById', authMiddleware,checkPermission("VARIANT_LIST","view"), getProductVariantById);
 
 /**
   * @swagger
@@ -115,7 +122,19 @@ productVariantRouter.get('/GetById/:id', authMiddleware,checkPermission("PRODUCT
   *       200:
   *         description: ProductVariant deleted successfully.
   */
-productVariantRouter.post('/Delete', authMiddleware,checkPermission("PRODUCT_LIST","delete"), deleteProductVariant);
+productVariantRouter.put('/Delete', authMiddleware,checkPermission("VARIANT_LIST","delete"), deleteProductVariant);
+
+/**
+  * @swagger
+  * /api/ProductVariant/GetVariantList:
+  *   get:
+  *     summary: Get All Sizes
+  *     tags: [ProductVariant]
+  *     responses:
+  *       200:
+  *         description: Success
+  */
+productVariantRouter.get('/GetVariantList', authMiddleware, checkPermission("VARIANT_LIST", "view"), getVariants);
 
 
 module.exports = productVariantRouter;

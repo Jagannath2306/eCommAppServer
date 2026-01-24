@@ -50,7 +50,7 @@ APIRouter.use('/BrandLogo', routers.brandLogoRouter);
 APIRouter.use('/Customer', routers.customerRouter);
 APIRouter.use('/ContactUs', routers.contactusRouter);
 APIRouter.use('/CustomerAddress', routers.customerAddressRoute);
-APIRouter.use('/ProductMasterStatus', routers.productmasterstatusRoute);
+APIRouter.use('/ProductStatusMaster', routers.productstatusmasterRoute);
 APIRouter.use('/ProductStatusMapping', routers.productstatusmappingRoute);
 APIRouter.use('/ModuleMaster', routers.modulemasterRoute);
 APIRouter.use('/SubModuleMaster', routers.submodulemasterRoute);

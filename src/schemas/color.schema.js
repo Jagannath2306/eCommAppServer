@@ -3,19 +3,21 @@ module.exports = {
         schemas: {
             InsertColor: {
                 type: "object",
-                required: ['name', 'code'],
+                required: ['name', 'code', "color"],
                 properties: {
                     name: { type: "string" },
-                    code: { type: "string" }
+                    code: { type: "string" },
+                    color: { type: "string" },
                 }
             },
             UpdateColor: {
                 type: "object",
-                required: ['id', 'name', 'code'],
+                required: ['id', 'name', 'code', "color"],
                 properties: {
                     id: { type: "string" },
                     name: { type: "string" },
-                    code: { type: "string" }
+                    code: { type: "string" },
+                    color: { type: "string" },
                 }
             },
             GetAllColors: {

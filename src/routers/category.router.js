@@ -32,7 +32,7 @@ const checkPermission = require('../middlewares/role.auth.middleware');
  *       401:
  *         description: Unauthorized
  */
-categoryRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveCategory);
+categoryRouter.post('/Save', authMiddleware, checkPermission("CATEGORY_LIST", "create"), saveCategory);
 
 /**
  * @swagger
@@ -54,7 +54,7 @@ categoryRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "cr
  *       401:
  *         description: Unauthorized
  */
-categoryRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateCategory);
+categoryRouter.post('/Update', authMiddleware, checkPermission("CATEGORY_LIST", "edit"), updateCategory);
 
 /**
   * @swagger
@@ -78,7 +78,7 @@ categoryRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "
   *               items:
   *                 type: object
   */
-categoryRouter.post('/GetAllCategories', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllCategories);
+categoryRouter.post('/GetAllCategories', authMiddleware, checkPermission("CATEGORY_LIST", "view"), getAllCategories);
 
 /**
  * @swagger
@@ -102,7 +102,7 @@ categoryRouter.post('/GetAllCategories', authMiddleware, checkPermission("PRODUC
  *       200:
  *         description: Returns Category object.
  */
-categoryRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategoryById);
+categoryRouter.post('/GetById', authMiddleware, checkPermission("CATEGORY_LIST", "view"), getCategoryById);
 
 /**
  * @swagger
@@ -118,7 +118,7 @@ categoryRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", 
  *         description: Unauthorized
  */
 
-categoryRouter.get('/GetCategories', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategories);
+categoryRouter.get('/GetCategories', authMiddleware, checkPermission("CATEGORY_LIST", "view"), getCategories);
 
 
 /**
@@ -135,7 +135,7 @@ categoryRouter.get('/GetCategories', authMiddleware, checkPermission("PRODUCT_LI
  *         description: Unauthorized
  */
 
-categoryRouter.get('/GetCategoriesList', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getCategoriesList);
+categoryRouter.get('/GetCategoriesList', authMiddleware, checkPermission("CATEGORY_LIST", "view"), getCategoriesList);
 
 /**
   * @swagger
@@ -153,7 +153,7 @@ categoryRouter.get('/GetCategoriesList', authMiddleware, checkPermission("PRODUC
   *       200:
   *         description: Category deleted successfully.
   */
-categoryRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteCategory);
+categoryRouter.put('/Delete', authMiddleware, checkPermission("CATEGORY_LIST", "delete"), deleteCategory);
 
 
 module.exports = categoryRouter;

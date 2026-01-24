@@ -24,12 +24,15 @@ module.exports = {
             },
             InsertCategory: {
                 type: "object",
-                required: ["name", "title", "imagePath"],
+                required: ["name", "title", "imagePath","code"],
                 properties: {
                     name: {
                         type: "string",
                     },
                     title: {
+                        type: "string",
+                    },
+                    code: {
                         type: "string",
                     },
                     imagePath: {
@@ -40,7 +43,7 @@ module.exports = {
             },
             UpdateCategory: {
                 type: "object",
-                required: ["id", "name", "title"],
+                required: ["id", "name", "title","code"],
                 properties: {
                     id: {
                         type: "string",
@@ -49,6 +52,9 @@ module.exports = {
                         type: "string",
                     },
                     title: {
+                        type: "string",
+                    },
+                    code: {
                         type: "string",
                     },
                     imagePath: {

@@ -13,6 +13,7 @@ const saveColor = async (req, res) => {
 
     const schema = Joi.object({
         name: Joi.string().min(3).max(20).required(),
+        color: Joi.string().min(4).max(9).required(),
         code: Joi.string().min(2).max(10).required()
     });
 
@@ -25,7 +26,8 @@ const saveColor = async (req, res) => {
     }
 
     const name = value.name.trim().toLowerCase();
-    const code = value.code.trim().toUpperCase();
+    const color = value.color;
+    const code = value.code;
 
     const exists = await Color.isExists(name, code);
     if (exists) {
@@ -35,13 +37,14 @@ const saveColor = async (req, res) => {
         });
     }
 
-    const color = new Color({
+    const newColor = new Color({
         name,
+        color,
         code,
         createdBy: loggedInUser.id
     });
 
-    await color.save();
+    await newColor.save();
 
     return res.status(201).json({
         success: true,
@@ -62,6 +65,7 @@ const updateColor = async (req, res) => {
     const schema = Joi.object({
         id: Joi.string().hex().length(24).required(),
         name: Joi.string().min(3).max(20).required(),
+        color: Joi.string().min(4).max(9).required(),
         code: Joi.string().min(2).max(10).required()
     });
 
@@ -74,11 +78,12 @@ const updateColor = async (req, res) => {
     }
 
     const name = value.name.trim().toLowerCase();
-    const code = value.code.trim().toUpperCase();
+    const color = value.color;
+    const code = value.code;
     const colorId = value.id;
 
-    const color = await Color.findById(colorId);
-    if (!color) {
+    const updateColor = await Color.findById(colorId);
+    if (!updateColor) {
         return res.status(404).json({
             success: false,
             message: "Color not found"
@@ -97,6 +102,7 @@ const updateColor = async (req, res) => {
         colorId,
         {
             name,
+            color,
             code,
             updatedBy: loggedInUser.id
         }
@@ -168,7 +174,7 @@ const getColorById = async (req, res) => {
             message: error.details[0].message
         });
     }
-const { id } = value;
+    const { id } = value;
     const color = await Color.findOne({ _id: id, isActive: true })
         .populate({ path: 'createdBy', select: 'firstName lastName email' })
         .populate({ path: 'updatedBy', select: 'firstName lastName email' });
@@ -204,9 +210,9 @@ const deleteColor = async (req, res) => {
 }
 
 const getColorList = async (req, res) => {
-   
- const loggedInUser = req.session.user;
- if (!loggedInUser) {
+
+    const loggedInUser = req.session.user;
+    if (!loggedInUser) {
         return res.status(401).json({
             success: false,
             message: "Unauthorized"
@@ -221,4 +227,4 @@ const getColorList = async (req, res) => {
     });
 }
 
-module.exports = { saveColor, updateColor, deleteColor, getColorById, getAllColors,getColorList }
+module.exports = { saveColor, updateColor, deleteColor, getColorById, getAllColors, getColorList }

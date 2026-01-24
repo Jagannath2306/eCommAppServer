@@ -30,7 +30,7 @@ const checkPermission = require('../middlewares/role.auth.middleware');
  *       201:
  *         description: Color Saved Successfully
  */
-colorRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveColor);
+colorRouter.post('/Save', authMiddleware, checkPermission("COLOR_LIST", "create"), saveColor);
 
 
 /**
@@ -49,7 +49,7 @@ colorRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "creat
   *       201:
   *         description: Color updated successfully.
   */
-colorRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateColor);
+colorRouter.post('/Update', authMiddleware, checkPermission("COLOR_LIST", "edit"), updateColor);
 
 
 /**
@@ -74,7 +74,7 @@ colorRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edi
   *               items:
   *                 type: object
   */
-colorRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllColors);
+colorRouter.post('/GetAll', authMiddleware, checkPermission("COLOR_LIST", "view"), getAllColors);
 
 /**
  * @swagger
@@ -96,7 +96,7 @@ colorRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "vie
  *       200:
  *         description: Returns Color object.
  */
-colorRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getColorById);
+colorRouter.post('/GetById', authMiddleware, checkPermission("COLOR_LIST", "view"), getColorById);
 
 /**
   * @swagger
@@ -114,7 +114,7 @@ colorRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "vi
   *       200:
   *         description: Color deleted successfully.
   */
-colorRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteColor);
+colorRouter.put('/Delete', authMiddleware, checkPermission("COLOR_LIST", "delete"), deleteColor);
 
 
 /**
@@ -127,7 +127,7 @@ colorRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "dele
   *       200:
   *         description: Success
   */
-colorRouter.get('/GetColorList', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getColorList);
+colorRouter.get('/GetColorList', authMiddleware, checkPermission("COLOR_LIST", "view"), getColorList);
 
 
 module.exports = colorRouter;

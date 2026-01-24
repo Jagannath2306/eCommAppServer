@@ -3,50 +3,51 @@ const mongoose = require('mongoose');
 const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: [true, 'Name is Required !!'],
         trim: true
     },
     code: {
         type: String,
-        required: true,
+        required: [true, 'Code is Required !!'],
         unique: true,
         uppercase: true,
         trim: true
     },
     title: {
         type: String,
-        required: true
+         required: [true, 'Title is Required !!'],
     },
     price: {
         type: Number,
-        required: true,
+        required: [true, 'Price is Required !!'],
         min: 0
     },
     salePrice: {
         type: Number,
+         required: [true, 'Sale Price is Required !!'],
         min: 0
     },
     shortDetails: {
         type: String,
-        required: true
+         required: [true, 'Short Details is Required !!'],
     },
     description: {
         type: String,
-        required: true
+        required: [true, 'Description is Required !!']
     },
     categoryIds: [{
         type: mongoose.Types.ObjectId,
         ref: 'category',
-        required: true
+         required: [true, 'Category is Required !!']
     }],
     tagIds: [{
         type: mongoose.Types.ObjectId,
         ref: 'tag',
-         required: true
+         required: [true, 'Tags is Required !!']
     }],
     imagePaths: [{
         type: String,
-        required: true
+        required: [true, 'Image is Required !!']
     }],
     isActive: {
         type: Boolean,

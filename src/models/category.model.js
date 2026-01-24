@@ -11,6 +11,10 @@ const CategorySchema = mongoose.Schema({
     type: String,
     required: [true, 'Title is Required !!']
   },
+  code: {
+    type: String,
+    required: [true, 'Code is Required !!']
+  },
   slug: {
     type: String,
     required: true,

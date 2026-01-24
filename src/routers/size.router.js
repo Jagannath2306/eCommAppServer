@@ -28,7 +28,7 @@ const checkPermission = require('../middlewares/role.auth.middleware');
  *       201:
  *         description: Size Saved Successfully
  */
-sizeRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create"), saveSize);
+sizeRouter.post('/Save', authMiddleware, checkPermission("SIZE_LIST", "create"), saveSize);
 
 
 /**
@@ -47,7 +47,7 @@ sizeRouter.post('/Save', authMiddleware, checkPermission("PRODUCT_LIST", "create
   *       201:
   *         description: Size updated successfully.
   */
-sizeRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit"), updateSize);
+sizeRouter.post('/Update', authMiddleware, checkPermission("SIZE_LIST", "edit"), updateSize);
 
 
 /**
@@ -72,7 +72,7 @@ sizeRouter.post('/Update', authMiddleware, checkPermission("PRODUCT_LIST", "edit
   *               items:
   *                 type: object
   */
-sizeRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getAllSize);
+sizeRouter.post('/GetAll', authMiddleware, checkPermission("SIZE_LIST", "view"), getAllSize);
 
 /**
  * @swagger
@@ -95,7 +95,7 @@ sizeRouter.post('/GetAll', authMiddleware, checkPermission("PRODUCT_LIST", "view
  *         description: Returns Size object.
  */
 
-sizeRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getSizeById);
+sizeRouter.post('/GetById', authMiddleware, checkPermission("SIZE_LIST", "view"), getSizeById);
 /**
   * @swagger
   * /api/Size/Delete:
@@ -112,7 +112,7 @@ sizeRouter.post('/GetById', authMiddleware, checkPermission("PRODUCT_LIST", "vie
   *       200:
   *         description: Size deleted successfully.
   */
-sizeRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delete"), deleteSize);
+sizeRouter.put('/Delete', authMiddleware, checkPermission("SIZE_LIST", "delete"), deleteSize);
 
 /**
   * @swagger
@@ -124,5 +124,5 @@ sizeRouter.put('/Delete', authMiddleware, checkPermission("PRODUCT_LIST", "delet
   *       200:
   *         description: Success
   */
-sizeRouter.get('/GetSizeList', authMiddleware, checkPermission("PRODUCT_LIST", "view"), getSizeList);
+sizeRouter.get('/GetSizeList', authMiddleware, checkPermission("SIZE_LIST", "view"), getSizeList);
 module.exports = sizeRouter;

@@ -8,6 +8,10 @@ const ColorSchema = mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    color: {
+        type: String,
+        required: [true, 'Code is Required !!'],
+    },
     code: {
         type: String,
         required: [true, 'Code is Required !!'],

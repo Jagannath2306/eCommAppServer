@@ -3,17 +3,19 @@ module.exports = {
         schemas: {
             InsertSize: {
                 type: "object",
-                required: ['name'],
+                required: ['name',"code"],
                 properties: {
-                    name: { type: "string" }
+                    name: { type: "string" },
+                    code: { type: "string" }
                 }
             },
             UpdateSize: {
                 type: "object",
-                required: ['id', 'name'],
+                required: ['id', 'name',"code"],
                 properties: {
                     id: { type: "string" },
-                    name: { type: "string" }
+                    name: { type: "string" },
+                    code: { type: "string" }
                 }
             },
             GetAllSizes: {

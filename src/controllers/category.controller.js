@@ -35,7 +35,8 @@ const saveCategory = (req, res) => {
 
             const schema = Joi.object({
                 name: Joi.string().min(2).max(20).required(),
-                title: Joi.string().min(2).max(20).required()
+                title: Joi.string().min(2).max(20).required(),
+                code: Joi.string().min(2).max(4).required()
             });
 
             const { error, value } = schema.validate(req.body);
@@ -59,6 +60,7 @@ const saveCategory = (req, res) => {
             const category = new Category({
                 name: value.name,
                 title: value.title,
+                code: value.code.toUpperCase(),
                 slug: slugify(value.name, { lower: true, strict: true }),
                 imagePath,
                 createdBy: loggedInUser.id
@@ -108,6 +110,7 @@ const updateCategory = async (req, res) => {
             id: Joi.string().hex().length(24).required(),
             name: Joi.string().min(2).max(50).required(),
             title: Joi.string().min(2).max(100).required(),
+            code: Joi.string().min(2).max(4).required(),
             imagePath: Joi.string().required()
         });
 

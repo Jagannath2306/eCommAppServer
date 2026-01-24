@@ -3,9 +3,17 @@ const Product = require('../models/product.model');
 const Color = require('../models/color.model');
 const Size = require('../models/size.model');
 const Joi = require('joi');
+const { default: mongoose } = require('mongoose');
 
 const saveProductVariant = async (req, res) => {
     const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
 
     const Schema = Joi.object({
         productId: Joi.string().hex().length(24).required(),
@@ -71,11 +79,17 @@ const saveProductVariant = async (req, res) => {
 const updateProductVariant = async (req, res) => {
     const loggedInUser = req.session.user;
 
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
     const Schema = Joi.object({
         id: Joi.string().hex().length(24).required(),
         price: Joi.number().positive().required(),
         stock: Joi.number().integer().min(0).required(),
-        isActive: Joi.boolean().optional()
     });
 
     const result = Schema.validate(req.body);
@@ -109,6 +123,14 @@ const updateProductVariant = async (req, res) => {
 };
 
 const getAllProductVariant = async (req, res) => {
+    const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
     const schema = Joi.object({
         pageSize: Joi.number().min(5).required(),
         page: Joi.number().min(1).required(),
@@ -147,13 +169,95 @@ const getAllProductVariant = async (req, res) => {
 }
 
 const getProductVariantById = async (req, res) => {
-    const id = req.params.id;
+    const loggedInUser = req.session.user;
 
-    const variant = await ProductVariant.findOne({ _id: id, isActive: true })
-        .populate({ path: 'createdBy', select: 'firstName lastName email' })
-        .populate({ path: 'updatedBy', select: 'firstName lastName email' });
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
+    const schema = Joi.object({
+        id: Joi.string().required()
+    });
+    const result = schema.validate(req.body);
+    if (result.error) {
+        return res.status(400).send({ success: false, message: result.error.details[0].message });
+    }
+    const { id } = result.value;
+
+    const variant = await ProductVariant.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(id), isActive: true } },
+
+        // Join with Products
+        {
+            $lookup: {
+                from: 'products', // ensure this matches your DB collection name
+                localField: 'productId',
+                foreignField: '_id',
+                as: 'productData'
+            }
+        },
+        { $unwind: '$productData' },
+
+        // Join with Colors
+        {
+            $lookup: {
+                from: 'colors',
+                localField: 'colorId',
+                foreignField: '_id',
+                as: 'colorData'
+            }
+        },
+        { $unwind: { path: '$colorData', preserveNullAndEmptyArrays: true } },
+
+        {
+            $lookup: {
+                from: 'sizes',
+                localField: 'sizeId',
+                foreignField: '_id',
+                as: 'sizeData'
+            }
+        },
+        { $unwind: { path: '$sizeData', preserveNullAndEmptyArrays: true } },
+
+        {
+            $lookup: {
+                from: 'usermasters',
+                localField: 'createdBy',
+                foreignField: '_id',
+                as: 'userData'
+            }
+        },
+        { $unwind: { path: '$userData', preserveNullAndEmptyArrays: true } },
+
+        // 1. "Flatten" the fields to the top level
+        {
+            $project: {
+                _id: 1,
+                price: 1,
+                stock: 1,
+                isActive: 1,
+                sku: 1,
+                updatedOn: 1,
+                createdOn: 1,
+                productName: '$productData.name',
+                imagePath: { $arrayElemAt: ['$productData.imagePaths', 0] },
+                productPrice: '$productData.price',
+                productSalePrice: '$productData.salePrice',
+                productShortDetails: '$productData.shortDetails',
+                productDetails: '$productData.description',
+                productTitle: '$productData.title',
+                colorName: '$colorData.name',
+                colorValue: '$colorData.color',
+                size: '$sizeData.name',
+               createdBy: { $concat: ["$userData.firstName", " ", "$userData.lastName"] },
+            }
+        }
+    ]);
     if (variant) {
-        res.status(200).json({ success: true, data: variant, message: "Product Variant fetched successfully" });
+        res.status(200).json({ success: true, data: variant[0], message: "Product Variant fetched successfully" });
     } else {
         res.status(402).json({ success: false, message: "Data not found" });
     }
@@ -161,6 +265,13 @@ const getProductVariantById = async (req, res) => {
 
 const deleteProductVariant = async (req, res) => {
     const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
 
     const Schema = Joi.object({
         id: Joi.string().required()
@@ -183,10 +294,79 @@ const deleteProductVariant = async (req, res) => {
     }
 }
 
+const getVariants = async (req, res) => {
+    const loggedInUser = req.session.user;
+
+    if (!loggedInUser) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized user'
+        });
+    }
+
+    const rows = await ProductVariant.aggregate([
+        { $match: { isActive: true } },
+
+        // Join with Products
+        {
+            $lookup: {
+                from: 'products', // ensure this matches your DB collection name
+                localField: 'productId',
+                foreignField: '_id',
+                as: 'productData'
+            }
+        },
+        { $unwind: '$productData' },
+
+        // Join with Colors
+        {
+            $lookup: {
+                from: 'colors',
+                localField: 'colorId',
+                foreignField: '_id',
+                as: 'colorData'
+            }
+        },
+        { $unwind: { path: '$colorData', preserveNullAndEmptyArrays: true } },
+
+        {
+            $lookup: {
+                from: 'sizes',
+                localField: 'sizeId',
+                foreignField: '_id',
+                as: 'sizeData'
+            }
+        },
+        { $unwind: { path: '$sizeData', preserveNullAndEmptyArrays: true } },
+
+        // 1. "Flatten" the fields to the top level
+        {
+            $project: {
+                _id: 1,
+                price: 1,
+                stock: 1,
+                isActive: 1,
+                sku: 1,
+                productName: '$productData.name',
+                imagePath: { $arrayElemAt: ['$productData.imagePaths', 0] },
+                discount: '$productData.discount',
+                colorName: '$colorData.name',
+                colorValue: '$colorData.color',
+                size: '$sizeData.name'
+            }
+        }
+    ]);
+    return res.status(200).json({
+        success: true,
+        data: rows,
+        message: "Variant fetched successfully"
+    });
+}
 module.exports = {
     saveProductVariant,
     updateProductVariant,
     getAllProductVariant,
     getProductVariantById,
-    deleteProductVariant
+    deleteProductVariant,
+    getVariants
 }

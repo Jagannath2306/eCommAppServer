@@ -15,9 +15,9 @@ const PageMasterSchema = mongoose.Schema({
         type: String,
         required: [true, 'Name is Required !!']
     },
-    code: {                         // 🔑 IMPORTANT
+    pageCode: {                         // 🔑 IMPORTANT
         type: String,
-        required: [true, 'Name is Required !!'],
+        required: [true, 'pageCode is Required !!'],
         unique: true,
         uppercase: true
     },
