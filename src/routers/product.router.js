@@ -33,6 +33,7 @@ const checkPermission = require('../middlewares/role.auth.middleware');
  *               - description
  *               - categoryIds
  *               - tagIds
+ *               - statusId
  *               - imagePaths
  *             properties:
  *               name:
@@ -57,6 +58,8 @@ const checkPermission = require('../middlewares/role.auth.middleware');
  *                 type: array
  *                 items:
  *                   type: string
+ *               statusId:
+ *                 type: string
  *               imagePaths:
  *                 type: array
  *                 items:
@@ -89,67 +92,44 @@ productRouter.post('/Save', authMiddleware, checkPermission('PRODUCT_LIST', "cre
  *               - code
  *               - title
  *               - price
- *               - salePrice
  *               - shortDetails
  *               - description
- *               - quantity
- *               - discount
- *               - isNewItem
- *               - isSale
- *               - categoryId
- *               - tagId
- *               - colorId
- *               - sizeId
+ *               - categoryIds
+ *               - tagIds
+ *               - statusId
  *               - imagePaths
  *             properties:
  *               id:
  *                 type: string
  *               name:
  *                 type: string
- *                 example: Shoes
  *               code:
  *                 type: string
- *                 example: SHOE001
  *               title:
  *                 type: string
- *                 example: Running Shoes
  *               price:
  *                 type: number
- *                 example: 2000
  *               salePrice:
  *                 type: number
- *                 example: 1500
  *               shortDetails:
  *                 type: string
- *                 example: Lightweight running shoes
  *               description:
  *                 type: string
- *                 example: Comfortable running shoes for daily use
- *               quantity:
- *                 type: number
- *                 example: 10
- *               discount:
- *                 type: number
- *                 example: 25
- *               isNewItem:
- *                 type: boolean
- *               isSale:
- *                 type: boolean
- *               categoryId:
- *                 type: string
- *               tagId:
- *                 type: string
- *               colorId:
- *                 type: string
- *               sizeId:
+ *               categoryIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               tagIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               statusId:
  *                 type: string
  *               imagePaths:
  *                 type: array
- *                 description: Upload exactly 5 product images
- *                 minItems: 5
- *                 maxItems: 5
  *                 items:
- *                   type: file
+ *                   type: string
+ *                   format: binary
  *     responses:
  *        201:
  *          description: Product created successfully

@@ -51,6 +51,7 @@ const saveProduct = async (req, res) => {
             description: Joi.string().trim().min(10).required(),
             categoryIds: Joi.array().items(Joi.string()).min(1).required(),
             tagIds: Joi.array().items(Joi.string()).required(),
+            statusId: Joi.string().required(),
             imagePaths: Joi.array().items(Joi.string())
         });
 
@@ -123,6 +124,7 @@ const updateProduct = async (req, res) => {
             description: Joi.string().trim().min(10).required(),
             categoryIds: Joi.array().items(Joi.string()).required(),
             tagIds: Joi.array().items(Joi.string()).required(),
+            statusId: Joi.string().required(),
             imagePaths: Joi.array().items(Joi.string()).min(1).required(),
             existingImages: Joi.any().optional()
         });
@@ -209,6 +211,7 @@ const getProductById = async (req, res) => {
     const product = await Product.findOne({ _id: id, isActive: true })
         .populate({ path: 'categoryIds', select: { _id: 1, name: 1 } })
         .populate({ path: 'tagIds', select: { _id: 1, name: 1 } })
+        .populate({ path: 'statusId', select: { _id: 1, name: 1, code:1, description:1} })
         .populate({ path: 'createdBy', select: { _id: 1, firstName: 1, lastName: 1, email: 1 } })
     if (product) {
         res.json({ success: true, data: product });
@@ -260,7 +263,8 @@ const getProducts = async (req, res) => {
     try {
         const rows = await Product.find({ isActive: true })
         let count = 0;
-        count = await Product.countDocuments({ isActive: true });
+        count = await Product.countDocuments({ isActive: true })
+            .populate({ path: 'statusId', select: { _id: 0, name: 1, code: 1 } })
         return res.status(200).json({
             success: true,
             data: rows,

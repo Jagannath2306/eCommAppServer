@@ -51,6 +51,7 @@ APIRouter.use('/Customer', routers.customerRouter);
 APIRouter.use('/ContactUs', routers.contactusRouter);
 APIRouter.use('/CustomerAddress', routers.customerAddressRoute);
 APIRouter.use('/ProductStatusMaster', routers.productstatusmasterRoute);
+APIRouter.use('/VariantStatusMaster', routers.variantstatusmasterRoute);
 APIRouter.use('/ProductStatusMapping', routers.productstatusmappingRoute);
 APIRouter.use('/ModuleMaster', routers.modulemasterRoute);
 APIRouter.use('/SubModuleMaster', routers.submodulemasterRoute);

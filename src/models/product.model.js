@@ -45,6 +45,11 @@ const ProductSchema = new mongoose.Schema({
         ref: 'tag',
          required: [true, 'Tags is Required !!']
     }],
+    statusId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'productstatusmaster',
+        required: [true, 'Status is Required !!']
+    },
     imagePaths: [{
         type: String,
         required: [true, 'Image is Required !!']

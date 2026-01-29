@@ -10,6 +10,7 @@ const customerRouter = require("./customer.router");
 const contactusRouter = require("./contactus.router");
 const customerAddressRoute = require("./customeraddress.router");
 const productstatusmasterRoute = require("./productstatusmaster.router");
+const variantstatusmasterRoute = require("./variantstatusmaster.router");
 const productstatusmappingRoute = require("./productstatusmapping.router");
 const modulemasterRoute = require("./modulemaster.router");
 const submodulemasterRoute = require("./submodulemaster.router");
@@ -37,6 +38,7 @@ module.exports = {
     contactusRouter,
     customerAddressRoute,
     productstatusmasterRoute,
+    variantstatusmasterRoute,
     productstatusmappingRoute,
     modulemasterRoute,
     submodulemasterRoute,
@@ -47,5 +49,5 @@ module.exports = {
     orderstatusRoute,
     paymentRoute,
     pagePermissionRoute,
-    rolePermissionRoute,
+    rolePermissionRoute
 }

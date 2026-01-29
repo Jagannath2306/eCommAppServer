@@ -10,6 +10,7 @@ const customerSchema = require('./customer.schema');
 const contactusSchema = require('./contactus.schema');
 const customerAddressSchema = require('./customeraddress.schema');
 const productstatusmasterSchema = require('./productstatusmaster.schema');
+const variantstatusmasterSchema = require('./variantstatusmaster.schema');
 const productstatusmappingSchema = require('./productstatusmapping.schema');
 const modulemasterSchema = require('./modulemaster.schema');
 const submodulemasterSchema = require('./submodulemaster.schema');
@@ -45,6 +46,7 @@ const AllSchemas = {
             ...contactusSchema.components.schemas,
             ...customerAddressSchema.components.schemas,
             ...productstatusmasterSchema.components.schemas,
+            ...variantstatusmasterSchema.components.schemas,
             ...productstatusmappingSchema.components.schemas,
             ...modulemasterSchema.components.schemas,
             ...submodulemasterSchema.components.schemas,

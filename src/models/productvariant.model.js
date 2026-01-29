@@ -17,6 +17,11 @@ const ProductVariantSchema = new mongoose.Schema({
         ref: 'size',
         required: true
     },
+    statusId: {
+            type: mongoose.Types.ObjectId,
+            ref: 'variantstatusmaster',
+            required: [true, 'Status is Required !!']
+        },
     sku: {
         type: String,
         required: true,

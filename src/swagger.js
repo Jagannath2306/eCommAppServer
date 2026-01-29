@@ -24,6 +24,7 @@ const options = {
         "./src/routers/product.router.js",
         "./src/routers/productvariant.router.js",
         "./src/routers/productstatusmaster.router.js",
+        "./src/routers/variantstatusmaster.router.js",
         "./src/routers/brandlogo.router.js",
         "./src/routers/customer.router.js",
         "./src/routers/contactus.router.js",

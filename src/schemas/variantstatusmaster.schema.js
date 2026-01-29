@@ -1,49 +1,59 @@
 module.exports = {
     components: {
         schemas: {
-            InsertProductVariant: {
+            InsertVariantStatusMaster: {
                 type: "object",
-                required: ["productId", "colorId","statusId", "sizeId", "price", "stock"],
+                required: ["code", "name", "color", "description", "isSelectable", "isSellable"],
                 properties: {
-                    productId: {
+                    code: {
                         type: "string",
                     },
-                    colorId: {
+                    name: {
                         type: "string",
                     },
-                    sizeId: {
+                    color: {
                         type: "string",
                     },
-                    statusId: {
+                    description: {
                         type: "string",
                     },
-                    price: {
-                        type: "number",
+                    isSelectable: {
+                        type: "boolean",
                     },
-                    stock: {
-                        type: "integer",
+                    isSellable: {
+                        type: "boolean",
                     }
-                }
+                },
+
             },
-            UpdateProductVariant: {
+            UpdateVariantStatusMaster: {
                 type: "object",
-                required: ["id", "price", "stock","statusId"],
+                required: ["id", "code", "name", "color", "description", "isSelectable", "isSellable"],
                 properties: {
                     id: {
                         type: "string",
                     },
-                    price: {
-                        type: "number",
-                    },
-                    stock: {
-                        type: "integer",
-                    },
-                    statusId: {
+                    code: {
                         type: "string",
+                    },
+                    name: {
+                        type: "string",
+                    },
+                    color: {
+                        type: "string",
+                    },
+                    description: {
+                        type: "string"
+                    },
+                    isSelectable: {
+                        type: "boolean"
+                    },
+                    isSellable: {
+                        type: "boolean"
                     }
                 }
             },
-            GetAllProductVariant: {
+            GetAllVariantStatusMaster: {
                 type: "object",
                 required: ['pageSize', 'page', "sortCol", "sort"],
                 properties: {
@@ -64,7 +74,14 @@ module.exports = {
                     }
                 }
             },
-            DeleteProductVariant: {
+            GetVariantStatusMasterById: {
+                type: "object",
+                required: ['id'],
+                properties: {
+                    id: { type: "string" }
+                }
+            },
+            DeleteVariantStatusMaster: {
                 type: "object",
                 required: ['id'],
                 properties: {
@@ -74,4 +91,3 @@ module.exports = {
         }
     }
 }
-

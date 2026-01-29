@@ -2,6 +2,7 @@ const ProductVariant = require('../models/productvariant.model');
 const Product = require('../models/product.model');
 const Color = require('../models/color.model');
 const Size = require('../models/size.model');
+const VariantStatus = require('../models/variantstatusmaster.model');
 const Joi = require('joi');
 const { default: mongoose } = require('mongoose');
 
@@ -19,6 +20,7 @@ const saveProductVariant = async (req, res) => {
         productId: Joi.string().hex().length(24).required(),
         colorId: Joi.string().hex().length(24).required(),
         sizeId: Joi.string().hex().length(24).required(),
+        statusId: Joi.string().hex().length(24).required(),
         price: Joi.number().positive().required(),
         stock: Joi.number().integer().min(0).required()
     });
@@ -29,14 +31,15 @@ const saveProductVariant = async (req, res) => {
         return res.status(400).send({ success: false, message: result.error.details[0].message });
     }
 
-    const { productId, colorId, sizeId, price, stock } = result.value;
+    const { productId, colorId, sizeId, statusId, price, stock } = result.value;
 
     // Fetch codes for SKU
     const product = await Product.findById(productId).select('code');
     const color = await Color.findById(colorId).select('code');
     const size = await Size.findById(sizeId).select('code');
+    const status = await VariantStatus.findById(statusId).select('code');
 
-    if (!product || !color || !size) {
+    if (!product || !color || !size || status) {
         return res.status(400).json({
             success: false,
             message: 'Invalid product / color / size'
@@ -49,7 +52,8 @@ const saveProductVariant = async (req, res) => {
     const exists = await ProductVariant.findOne({
         productId,
         colorId,
-        sizeId
+        sizeId,
+        statusId
     });
 
     if (exists) {
@@ -63,6 +67,7 @@ const saveProductVariant = async (req, res) => {
         productId,
         colorId,
         sizeId,
+        statusId,
         sku,
         price,
         stock,
@@ -90,6 +95,7 @@ const updateProductVariant = async (req, res) => {
         id: Joi.string().hex().length(24).required(),
         price: Joi.number().positive().required(),
         stock: Joi.number().integer().min(0).required(),
+        statusId: Joi.string().hex().length(24).required(),
     });
 
     const result = Schema.validate(req.body);
@@ -232,6 +238,16 @@ const getProductVariantById = async (req, res) => {
         },
         { $unwind: { path: '$userData', preserveNullAndEmptyArrays: true } },
 
+        {
+            $lookup: {
+                from: 'variantstatusmasters',
+                localField: 'statusId',
+                foreignField: '_id',
+                as: 'status'
+            }
+        },
+        { $unwind: { path: '$status', preserveNullAndEmptyArrays: true } },
+
         // 1. "Flatten" the fields to the top level
         {
             $project: {
@@ -252,6 +268,9 @@ const getProductVariantById = async (req, res) => {
                 colorName: '$colorData.name',
                 colorValue: '$colorData.color',
                 size: '$sizeData.name',
+                statusId: '$status._id',
+                statusName: '$status.name',
+                statusDesc: '$status.description',
                createdBy: { $concat: ["$userData.firstName", " ", "$userData.lastName"] },
             }
         }
