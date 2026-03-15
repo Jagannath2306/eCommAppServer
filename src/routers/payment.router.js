@@ -1,67 +1,68 @@
-const express = require('express');
+const express = require("express");
 const paymentRouter = express.Router();
-const { customerAuthMiddleware } = require('../middlewares/user.auth.middleware');
-const { savePaymentMaster, getOrders, cancelOrder } = require('../controllers/payment.controller');
 
+const { customerAuthMiddleware } = require("../middlewares/user.auth.middleware");
+
+const {
+  createPayment,
+  paymentWebhook,
+  getPaymentById
+} = require("../controllers/payment.controller");
 
 /**
  * @swagger
  * tags:
- *  name :  PaymentMaster
- * description : API for managing Payment Master 
+ *   name: Payments
+ *   description: Payment APIs
  */
-
 
 
 /**
  * @swagger
- * /api/Payment/Save:
+ * /api/payment/createPayment:
  *   post:
- *     summary: Save Payment
- *     tags: [PaymentMaster]
+ *     summary: Create Payment
+ *     tags: [Payments]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/SavePaymentMaster'
+ *             $ref: '#/components/schemas/SavePayment'
  *     responses:
  *       201:
- *         description: Payment Saved Successfully
+ *         description: Payment created successfully
  */
-paymentRouter.post('/Save', customerAuthMiddleware, savePaymentMaster);
+paymentRouter.post("/createPayment",customerAuthMiddleware, createPayment);
+
 
 /**
  * @swagger
- * /api/Payment/GetOrders:
- *   get:
- *     summary: Get Orders
- *     tags: [PaymentMaster]
+ * /api/payment/webhook:
+ *   post:
+ *     summary: Payment Gateway Webhook
+ *     tags: [Payments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PaymentWebhook'
  *     responses:
  *       200:
- *         description: Orders fetched successfully
- *       401:
- *         description: Unauthorized
+ *         description: Webhook processed
  */
-paymentRouter.get('/GetOrders', customerAuthMiddleware, getOrders);
+paymentRouter.post("/webhook",paymentWebhook);
+
 
 /**
  * @swagger
- * /api/Payment/CancelOrder:
+ * /api/payment/getPaymentById:
  *   post:
- *     summary: Cancel Order
- *     tags: [PaymentMaster]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CancelOrder'
- *     responses:
- *       201:
- *         description: Order Cancelled Successfully
+ *     summary: Get Payment By Id
+ *     tags: [Payments]
  */
-paymentRouter.post('/CancelOrder', customerAuthMiddleware, cancelOrder);
-
+paymentRouter.post("/getPaymentById",customerAuthMiddleware,getPaymentById
+);
 
 module.exports = paymentRouter;

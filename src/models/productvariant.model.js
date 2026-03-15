@@ -68,6 +68,8 @@ ProductVariantSchema.index(
     { unique: true }
 );
 
-const ProductVariant = mongoose.model('productvariant',ProductVariantSchema);
-
+// const ProductVariant = mongoose.model('productvariant',ProductVariantSchema);
+const ProductVariant =
+  mongoose.models.ProductVariant ||
+  mongoose.model("ProductVariant", ProductVariantSchema);
 module.exports = ProductVariant;

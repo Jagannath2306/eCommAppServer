@@ -39,8 +39,9 @@ PaymentStatusSchema.statics.isExists = async function isExists(_name, id) {
     return PaymentStatus ? true : false;
 }
 
-const PaymentStatus = mongoose.model('paymentstatus', PaymentStatusSchema);
-
+const PaymentStatus =
+  mongoose.models.paymentStatus ||
+  mongoose.model("paymentStatus", PaymentStatusSchema);
 module.exports = PaymentStatus;
 
 

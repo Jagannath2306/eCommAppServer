@@ -1,50 +1,64 @@
 module.exports = {
-    components: {
-        schemas: {
-            SavePaymentMaster: {
-                type: "object",
-                required: ['addressId', 'subTotalAmount', 'shippingAmount', 'totalAmount', 'paymentTypeId', 'items', 'payment'],
-                properties: {
-                    addressId: { type: "string" },
-                    subTotalAmount: { type: 'number' },
-                    shippingAmount: { type: 'number' },
-                    totalAmount: { type: 'number' },
-                    paymentTypeId: { type: "string" },
-                    items: {
-                        type: 'array',
-                        items: {
-                            type: 'object',
-                            required: ['productId', 'sizeId', 'colorId', 'quantity', 'price', 'discount'],
-                            properties: {
-                                productId: { type: "string" },
-                                sizeId: { type: "string" },
-                                colorId: { type: "string" },
-                                quantity: { type: "number" },
-                                price: { type: "number" },
-                                discount: { type: "number" },
-                            }
-                        }
-                    },
-                    payment: {
-                        type: 'object',
-                        required: ['tokenId', 'description', 'amount'],
-                        properties: {
-                            tokenId: { type: "string" },
-                            description: { type: "string" },
-                            amount: { type: "number" }
-                        }
-                    }
-                }
-            },
-            CancelOrder: {
-                type: 'object',
-                required: ['paymentId', 'cancelReason'],
-                properties: {
-                    paymentId: { type: "string" },
-                    cancelReason: { type: "string" }
-                }
-            }
-        }
-    }
-}
+  components: {
+    schemas: {
 
+      SavePayment: {
+        type: "object",
+        required: [
+          "orderId",
+          "paymentTypeId",
+          "amount"
+        ],
+        properties: {
+
+          orderId: {
+            type: "string",
+            description: "Order ID"
+          },
+
+          paymentTypeId: {
+            type: "string",
+            description: "Payment Type ID (COD / Online)"
+          },
+
+          amount: {
+            type: "number",
+            description: "Payment amount"
+          }
+
+        }
+      },
+
+      PaymentWebhook: {
+        type: "object",
+        required: [
+          "paymentId",
+          "statusCode",
+          "transactionId",
+          "gatewayResponse"
+        ],
+        properties: {
+
+          paymentId: {
+            type: "string"
+          },
+
+          statusCode: {
+            type: "string",
+            enum: ["SUCCESS", "FAILED", "REFUNDED"]
+          },
+
+          transactionId: {
+            type: "string"
+          },
+
+          gatewayResponse: {
+            type: "object"
+          }
+
+        }
+      }
+
+    }
+  }
+};

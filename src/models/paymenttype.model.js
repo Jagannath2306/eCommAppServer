@@ -39,9 +39,9 @@ PaymentTypeSchema.statics.isExists = async function isExists(_name, id) {
     return PaymentType ? true : false;
 }
 
-const PaymentType = mongoose.model('paymenttype', PaymentTypeSchema);
-
-module.exports = PaymentType;
+module.exports =
+  mongoose.models.paymenttype ||
+  mongoose.model("paymenttype", PaymentTypeSchema);
 
 
 

@@ -19,10 +19,11 @@ const userpagerightsRoute = require("./userpagerights.router");
 const paymenttypeRoute = require("./paymenttype.router");
 const paymentstatusRoute = require("./paymentstatus.router");
 const orderstatusRoute = require("./orderstatus.router");
-const paymentRoute = require("./payment.router");
 const pagePermissionRoute = require("./pagepermissionmaster.router");
 const rolePermissionRoute = require("./rolepagepermission.router");
 const productVariantRoute = require("./productvariant.router");
+const orderRoute = require("./orders.router");
+const paymentRoute = require("./payment.router");
 
 module.exports = {
     userTypeRouter,
@@ -47,7 +48,8 @@ module.exports = {
     paymenttypeRoute,
     paymentstatusRoute,
     orderstatusRoute,
-    paymentRoute,
     pagePermissionRoute,
-    rolePermissionRoute
+    rolePermissionRoute,
+    orderRoute,
+    paymentRoute,
 }

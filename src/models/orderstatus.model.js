@@ -39,9 +39,16 @@ OrderStatusSchema.statics.isExists = async function isExists(_name, id) {
     return OrderStatus ? true : false;
 }
 
-const OrderStatus = mongoose.model('orderstatus', OrderStatusSchema);
+// const OrderStatus = mongoose.model('orderstatus', OrderStatusSchema);
+// const OrderStatus =
+//   mongoose.models.OrderStatus ||
+//   mongoose.model("orderstatus", OrderStatusSchema);
 
-module.exports = OrderStatus;
+// module.exports = OrderStatus;
+
+module.exports =
+  mongoose.models.orderstatus ||
+  mongoose.model("orderstatus", OrderStatusSchema);
 
 
 
