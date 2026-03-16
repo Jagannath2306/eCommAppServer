@@ -122,6 +122,14 @@ const createOrder = async (req, res) => {
       paymentTypeId: paymentType
     });
 
+    // Insert status history
+    await OrderStatusHistory.create({
+      orderId: order._id,
+      statusId: pendingStatus._id,
+      comment: "Your order has been placed.",
+      createdBy: loggedInUser.id
+    });
+    
     return res.status(201).json({
       message: "Order created successfully",
       order

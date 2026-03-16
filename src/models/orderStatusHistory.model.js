@@ -20,7 +20,6 @@ const OrderStatusHistorySchema = mongoose.Schema({
     createdBy: {
         type: mongoose.Types.ObjectId,
         ref: 'usermaster',
-        required: true
     },
     updatedBy: {
         type: mongoose.Types.ObjectId,

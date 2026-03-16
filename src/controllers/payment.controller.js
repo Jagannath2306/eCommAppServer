@@ -5,6 +5,7 @@ const OrderStatus = require("../models/orderStatus.model");
 const Order = require("../models/order.model");
 const Customer = require("../models/customer.model");
 const sendEmail = require('../utils/sendEmail');
+const OrderStatusHistory = require("../models/orderStatusHistory.model");
 
 const createPayment = async (req, res) => {
   try {
@@ -111,6 +112,12 @@ const paymentWebhook = async (req, res) => {
       { new: true }
     );
 
+      await OrderStatusHistory.create({
+      orderId: payment.orderId,
+      statusId:paidStatus._id,
+      comment: "Payment verified and order confirmed.",
+      createdBy: "6967369425092a30ec037bf3"// You can replace this with an admin user ID if needed
+    });
     // get customer info
     const userData = await Customer.findById(order.customerId);
 
