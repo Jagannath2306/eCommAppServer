@@ -65,6 +65,7 @@ APIRouter.use('/PagePermission', routers.pagePermissionRoute);
 APIRouter.use('/RolePermission', routers.rolePermissionRoute);
 APIRouter.use('/Order', routers.orderRoute);
 APIRouter.use('/Payment', routers.paymentRoute);
+APIRouter.use('/orderStatusHistory', routers.orderStatusHistoryRoute);
 
 
 // APIRouter.get(`/${process.env.PRODUCT_IMAGE_PATH}/*`, (req, res) => {

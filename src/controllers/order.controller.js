@@ -4,13 +4,14 @@ const ProductVariant = require("../models/productVariant.model");
 const OrderStatus = require("../models/orderStatus.model");
 const PaymentStatus = require("../models/paymentStatus.model");
 const PaymentType = require("../models/paymentType.model");
+const OrderStatusHistory = require("../models/orderStatusHistory.model");
 
 const createOrder = async (req, res) => {
   try {
 
- const loggedInUser = req.session.customer;
+    const loggedInUser = req.session.customer;
     if (!loggedInUser) {
-        return res.status(400).send({ success: false, message: "Unauthorized User!!" });
+      return res.status(400).send({ success: false, message: "Unauthorized User!!" });
     }
 
     // ✅ 1️⃣ Joi Validation
@@ -45,7 +46,7 @@ const createOrder = async (req, res) => {
       });
     }
 
-    const { customerId, billingAddress, items , paymentTypeId } = value;
+    const { customerId, billingAddress, items, paymentTypeId } = value;
 
     // ✅ 2️⃣ Get Default Order Status
     const pendingStatus = await OrderStatus.findOne({ name: "PENDING" });
@@ -53,7 +54,7 @@ const createOrder = async (req, res) => {
     if (!pendingStatus) {
       return res.status(400).json({ message: "Default order status not found" });
     }
-     //Get Default payment Status
+    //Get Default payment Status
     const paymentStatus = await PaymentStatus.findOne({ name: "PENDING" });
 
     if (!paymentStatus) {
@@ -62,12 +63,12 @@ const createOrder = async (req, res) => {
     //Get payment Type
     const paymentType = await PaymentType.findById(paymentTypeId);
 
-      if (!paymentType) {
-        return res.status(400).json({
-          message: "Invalid payment type"
-        });
-      }
-      const invoiceNo = "INV-" + Date.now();
+    if (!paymentType) {
+      return res.status(400).json({
+        message: "Invalid payment type"
+      });
+    }
+    const invoiceNo = "INV-" + Date.now();
     let subTotal = 0;
     const orderItems = [];
 
@@ -114,7 +115,7 @@ const createOrder = async (req, res) => {
       items: orderItems,
       invoiceNo: invoiceNo,
       shippingAmount,
-      subTotalAmount:subTotal,
+      subTotalAmount: subTotal,
       totalAmount,
       orderStatusId: pendingStatus._id,
       paymentStatusId: paymentStatus._id,
@@ -131,20 +132,19 @@ const createOrder = async (req, res) => {
   }
 };
 
-
 const getOrdersList = async (req, res) => {
   try {
     // const customerId = req.user._id;
 
     const orders = await Order.find()
-      .populate('customerId', 'name mobile email') // Only fetch specific fields for security
-      .populate('paymentStatusId', 'name') 
+      .populate('customerId', 'firstName lastName mobile email') // Only fetch specific fields for security
+      .populate('paymentStatusId', 'name')
       .populate('paymentTypeId', 'name')
       .populate('orderStatusId', 'name')
       .populate('items.productId', 'productName , sku, quantity , price, discount , total size, color'); // Populate product details in items
 
     return res.status(200).json({
-      success: true, 
+      success: true,
       message: "Orders fetched successfully",
       data: orders
     });
@@ -154,12 +154,26 @@ const getOrdersList = async (req, res) => {
   }
 };
 
+const getStatusList = async (req, res) => {
+  try {
+    const statusList = await OrderStatus.find({}, { name: 1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Statuses fetched successfully",
+      data: statusList
+    });
+
+  } catch (err) {
+    res.status(402).json({ success: false, message: "Data not found" });
+  }
+};
 
 const getOrderById = async (req, res) => {
   try {
-
+    console.log("Received request to fetch order with body:", req.body);
     const schema = Joi.object({
-      orderId: Joi.string().length(24).hex().required()
+      id: Joi.string().length(24).hex().required()
     });
 
     const { error, value } = schema.validate(req.body);
@@ -170,13 +184,14 @@ const getOrderById = async (req, res) => {
       });
     }
 
-    const { orderId } = value;
-    const customerId = req.user._id;
+    const { id } = value;
+    const order = await Order.findOne({ _id: id })
+      .populate('customerId', 'firstName lastName mobile email') // Only fetch specific fields for security
+      .populate('paymentStatusId', 'name')
+      .populate('paymentTypeId', 'name')
+      .populate('orderStatusId', 'name')
+      .populate('items.productId', 'productName , sku, quantity , price, discount , total size, color'); // Populate product details in items
 
-    const order = await Order.findOne({
-      _id: orderId,
-      customerId
-    })
 
     if (!order) {
       return res.status(404).json({
@@ -184,15 +199,74 @@ const getOrderById = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      message: "Order fetched successfully",
-      order
+    res.json({ success: true, data: order, message: "Order fetched successfully" });
+  } catch (err) {
+    res.status(402).json({ success: false, message: "Data not found" });
+  }
+};
+const updateOrderStatus = async (req, res) => {
+  try {
+ const loggedInUser = req.session.user;
+ console.log("Logged in user in updateOrderStatus:", loggedInUser);
+    if (!loggedInUser) {
+        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+    }
+    console.log("Received request to update order status:", req.body);
+
+    const schema = Joi.object({
+      orderId: Joi.string().length(24).hex().required(),
+      statusId: Joi.string().length(24).hex().required(),
+      comment: Joi.string().min(3).max(500).required()
+    });
+
+    const { error, value } = schema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message
+      });
+    }
+
+    const { orderId, statusId, comment } = value;
+
+    // Update order status
+    const order = await Order.findOneAndUpdate(
+      { _id: orderId },
+      { orderStatusId: statusId },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    // Insert status history
+    await OrderStatusHistory.create({
+      orderId,
+      statusId,
+      comment,
+      createdBy: loggedInUser.id
+    });
+
+    return res.json({
+      success: true,
+      message: "Order status updated successfully",
+      data: order
     });
 
   } catch (err) {
+
+    console.error("Error updating order status:", err);
+
     return res.status(500).json({
-      error: err.message
+      success: false,
+      message: "Internal server error"
     });
+
   }
 };
 
@@ -283,5 +357,7 @@ module.exports = {
   createOrder,
   getOrdersList,
   getOrderById,
-  cancelOrder
+  cancelOrder,
+  getStatusList,
+  updateOrderStatus
 };

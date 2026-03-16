@@ -41,6 +41,7 @@ const options = {
         "./src/routers/rolepagepermission.router.js",
         "./src/routers/orders.router.js",
         "./src/routers/payment.router.js",
+        "./src/routers/orderStatusHistory.router.js",
     ]
 }
 module.exports = options;

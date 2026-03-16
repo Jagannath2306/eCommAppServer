@@ -5,7 +5,9 @@ const { createOrder,
   getOrders,
   getOrderById,
   cancelOrder,
-  getOrdersList
+  getOrdersList,
+  getStatusList,
+  updateOrderStatus
  } = require('../controllers/order.controller');
 
 /**
@@ -60,7 +62,42 @@ orderRouter.get('/GetOrdersList', adminAuthMiddleware, getOrdersList);
  *       401:
  *         description: Unauthorized
  */
-orderRouter.post('/getOrderById', customerAuthMiddleware, getOrderById);
+orderRouter.post('/getOrderById', adminAuthMiddleware, getOrderById);
+
+/**
+ * @swagger
+ * /api/Order/getStatusList:
+ *   get:
+ *     summary: Get Status List
+ *     tags: [Orders]
+ *     responses:
+ *       200:
+ *         description: Statuses fetched successfully
+ *       401:
+ *         description: Unauthorized
+ */
+orderRouter.get('/getStatusList', adminAuthMiddleware, getStatusList);
+
+
+/**
+ * @swagger
+ * /api/Order/UpdateOrderStatus:
+ *   post:
+ *     summary: Update Order Status
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateOrderStatus'
+ *     responses:
+ *       200:
+ *         description: Statuses fetched successfully
+ *       401:
+ *         description: Unauthorized
+ */
+orderRouter.post('/UpdateOrderStatus', adminAuthMiddleware, updateOrderStatus);
 
 /**
  * @swagger

@@ -24,6 +24,7 @@ const rolePermissionSchema = require('./rolepagepermission.schema');
 const productVariantSchema = require('./productvariant.schema');
 const orderSchema = require('./order.schema');
 const paymentSchema = require('./payment.schema');
+const orderStatusHistorySchema = require('./orderStatusHistory.schema');
 
 const AllSchemas = {
     components: {
@@ -61,6 +62,7 @@ const AllSchemas = {
             ...productVariantSchema.components.schemas,
             ...orderSchema.components.schemas,
             ...paymentSchema.components.schemas,
+            ...orderStatusHistorySchema.components.schemas,
 
         }
     }

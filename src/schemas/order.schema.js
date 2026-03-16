@@ -42,6 +42,14 @@ module.exports = {
 
                 }
             },
+            UpdateOrderStatus: {
+                type: "object",
+                required: ["orderId", "statusId"],
+                properties: {
+                    orderId: { type: "string" },
+                    statusId: { type: "string" }
+                }
+            },
             cancelOrder: {
                 type: "object",
                 required: ["cancelReason"],
