@@ -5,6 +5,8 @@ const OrderStatus = require("../models/orderStatus.model");
 const PaymentStatus = require("../models/paymentStatus.model");
 const PaymentType = require("../models/paymentType.model");
 const OrderStatusHistory = require("../models/orderStatusHistory.model");
+const Customer = require("../models/customer.model");
+const sendEmail = require('../utils/sendEmail');
 
 const createOrder = async (req, res) => {
   try {
@@ -129,6 +131,22 @@ const createOrder = async (req, res) => {
       comment: "Your order has been placed.",
       createdBy: loggedInUser.id
     });
+
+     // get customer info
+        const userData = await Customer.findById(order.customerId);
+        console.log("Customer Data:", userData);
+        await sendEmail({
+          to: userData.email,
+          subject: "Your Order is Placed 🎉",
+          html: `
+            <h2>Hi ${userData.firstName},</h2>
+            <h2>Order Placed Successfully 🎉</h2>
+            <p>Your order ID is :<b>${order._id}</b>.</p>
+            <p>Total Amount: ₹${order.totalAmount}</p>
+            <br/><br/><br/><br/><br/>
+            <p>Thank you for shopping with us.</p>
+          `
+        });
     
     return res.status(201).json({
       message: "Order created successfully",
@@ -260,6 +278,21 @@ const updateOrderStatus = async (req, res) => {
       createdBy: loggedInUser.id
     });
 
+      const statusList = await OrderStatus.find();
+      const currentStatus = statusList.find(status => status._id.toString() === statusId);
+     // get customer info
+        const userData = await Customer.findById(order.customerId);
+    
+        await sendEmail({
+          to: userData.email,
+          subject: `Your Order is ${currentStatus.name} 🎉` ,
+          html: `
+            <h2>Hi ${userData.firstName},</h2>
+            <h2>${comment}</h2>
+            <br/><br/><br/><br/><br/>
+            <p>Thank you for shopping with us.</p>
+          `
+        });
     return res.json({
       success: true,
       message: "Order status updated successfully",

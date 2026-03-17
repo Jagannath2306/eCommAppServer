@@ -9,7 +9,7 @@ const OrderStatusHistorySchema = mongoose.Schema({
 
     statusId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "orderstatuse",
+        ref: "orderstatus",
         required: true
     },
 

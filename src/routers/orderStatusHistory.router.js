@@ -89,7 +89,7 @@ orderStatusHistoryRouter.get('/GetStatusHistoriesList', adminAuthMiddleware, get
  *       401:
  *         description: Unauthorized
  */
-orderStatusHistoryRouter.post('/getOrderStatusHistoryById', adminAuthMiddleware, getOrderStatusHistoryById);
+orderStatusHistoryRouter.post('/getOrderStatusHistoryById', getOrderStatusHistoryById);
 
 
 /**

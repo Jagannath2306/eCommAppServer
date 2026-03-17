@@ -34,7 +34,7 @@ const PaymentSchema = new mongoose.Schema(
     // ✅ Replace enum with reference
     paymentStatusId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "paymentstatus",
+      ref: "paymentStatus",
       required: true,
     },
 

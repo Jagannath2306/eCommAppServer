@@ -131,38 +131,47 @@ const getAllOrderStatusHistories = async (req, res) => {
 }
 
 const getOrderStatusHistoryById = async (req, res) => {
-    const loggedInUser = req.session.user;
-
-    if (!loggedInUser) {
-        return res.status(401).json({
-            success: false,
-            message: "Unauthorized"
-        });
-    }
-
+  try {
     const schema = Joi.object({
-        id: Joi.string().required()
+      id: Joi.string().required()
     });
 
-    const { error, value } = schema.validate(req.body);
+    const { error, value } = schema.validate(req.body); // better than body
     if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message
+      });
     }
-    const { id } = value;
-    const statusHistory = await orderStatusHistory.find({ _id: id, isActive: true })
-        .sort({ createdAt: 1 })
-        .populate({ path: 'createdBy', select: 'firstName lastName email' })
-        .populate({ path: 'updatedBy', select: 'firstName lastName email' });
-    if (statusHistory) {
-        res.status(200).json({ success: true, data: statusHistory });
-    } else {
-        res.status(402).json({ success: false, message: "Data not found" });
-    }
-}
 
+    const { id } = value;
+
+    const statusHistory = await orderStatusHistory.find({orderId: id})
+      .sort({ createdOn: 1 })
+      .populate('statusId','name' )
+      .populate({ path: 'createdBy', select: 'firstName lastName email' })
+      .populate({ path: 'updatedBy', select: 'firstName lastName email' });
+
+    if (statusHistory.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Data not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: statusHistory
+    });
+
+  } catch (err) {
+    console.error("Error fetching order status history:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
 const deleteOrderStatusHistory = async (req, res) => {
     const loggedInUser = req.session.user;
 

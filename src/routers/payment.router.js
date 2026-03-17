@@ -1,12 +1,13 @@
 const express = require("express");
 const paymentRouter = express.Router();
 
-const { customerAuthMiddleware } = require("../middlewares/user.auth.middleware");
+const { customerAuthMiddleware, adminAuthMiddleware } = require("../middlewares/user.auth.middleware");
 
 const {
   createPayment,
   paymentWebhook,
-  getPaymentById
+  getPaymentById,
+  getPaymentList
 } = require("../controllers/payment.controller");
 
 /**
@@ -62,7 +63,16 @@ paymentRouter.post("/webhook",paymentWebhook);
  *     summary: Get Payment By Id
  *     tags: [Payments]
  */
-paymentRouter.post("/getPaymentById",customerAuthMiddleware,getPaymentById
+paymentRouter.post("/getPaymentById",getPaymentById);
+
+/**
+ * @swagger
+ * /api/payment/getPaymentList:
+ *   get:
+ *     summary: Get Payment List
+ *     tags: [Payments]
+ */
+paymentRouter.get("/getPaymentList",adminAuthMiddleware,getPaymentList
 );
 
 module.exports = paymentRouter;

@@ -44,6 +44,7 @@ const createPayment = async (req, res) => {
       transactionId: transaction
     });
 
+  
     return res.status(201).json({
       message: "Payment created",
       data: payment
@@ -81,7 +82,6 @@ const paymentWebhook = async (req, res) => {
 
     // 🔐 Prevent duplicate webhook update
     const currentStatus = await PaymentStatus.findById(payment.paymentStatusId);
-    console.log("Current Payment Status:", currentStatus.name);
     if (currentStatus.name !== "PENDING") {
       return res.status(200).json({ message: "Already processed" });
     }
@@ -118,17 +118,16 @@ const paymentWebhook = async (req, res) => {
       comment: "Payment verified and order confirmed.",
       createdBy: "6967369425092a30ec037bf3"// You can replace this with an admin user ID if needed
     });
-    // get customer info
+     // get customer info
     const userData = await Customer.findById(order.customerId);
 
-console.log("Customer Data:", userData);
     await sendEmail({
       to: userData.email,
       subject: "Your Order is Confirmed 🎉",
       html: `
-        <h2>Order Placed Successfully 🎉</h2>
-        <p>Hi ${userData.name},</p>
-        <p>Your order <b>${order._id}</b> has been placed.</p>
+        <H2>Hi ${userData.firstName},</H2>
+        <h2>Your Order is Confirmed 🎉</h2>
+        <p>Your order ID is :<b>${order._id}</b>.</p>
         <p>Total Amount: ₹${order.totalAmount}</p>
         <br/><br/><br/><br/><br/>
         <p>Thank you for shopping with us.</p>
@@ -158,18 +157,48 @@ console.log("Customer Data:", userData);
 };
 const getPaymentById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const schema = Joi.object({
+          id: Joi.string().length(24).hex().required()
+        });
+    
+        const { error, value } = schema.validate(req.body);
+    
+        if (error) {
+          return res.status(400).json({
+            message: error.details[0].message
+          });
+        }
+    
+        const { id } = value;
 
-    const payment = await Payment.findById(id)
-      .populate("paymentStatusId")
-      .populate("paymentTypeId")
-      .populate("orderId");
+    const payment = await Payment.findById({ _id: id })
+     .populate('orderId', 'invoiceNo totalAmount items billingAddress')
+    .populate('paymentTypeId', 'name')
+    .populate('paymentStatusId', 'name')
 
     if (!payment) {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    return res.status(200).json({ data: payment });
+    return res.status(200).json({ success: true, message: "Payment fetched successfully", data: payment });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+const getPaymentList = async (req, res) => {
+  try {
+    const payment = await Payment.find()
+    .populate('orderId', 'invoiceNo totalAmount items billingAddress')
+    .populate('paymentTypeId', 'name')
+    .populate('paymentStatusId', 'name')
+
+    return res.status(200).json({
+      success: true,
+      message: "Payments fetched successfully",
+      data: payment
+    });
 
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -178,5 +207,6 @@ const getPaymentById = async (req, res) => {
 module.exports = {
   createPayment,
   paymentWebhook,
-  getPaymentById
+  getPaymentById,
+  getPaymentList
 };
