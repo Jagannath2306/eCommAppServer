@@ -124,6 +124,21 @@ const createOrder = async (req, res) => {
       paymentTypeId: paymentType
     });
 
+     for (const item of items) {
+      const variant = await ProductVariant.findById(item.variantId).populate("productId");
+
+      if (!variant) {
+        return res.status(404).json({ message: "Variant not found" });
+      }
+
+      if (variant.stock < item.quantity) {
+        return res.status(400).json({ message: "Insufficient stock" });
+      }
+      // Reduce stock
+      variant.stock -= item.quantity;
+      await variant.save();
+    }
+
     // Insert status history
     await OrderStatusHistory.create({
       orderId: order._id,
@@ -132,13 +147,13 @@ const createOrder = async (req, res) => {
       createdBy: loggedInUser.id
     });
 
-     // get customer info
-        const userData = await Customer.findById(order.customerId);
-        console.log("Customer Data:", userData);
-        await sendEmail({
-          to: userData.email,
-          subject: "Your Order is Placed 🎉",
-          html: `
+    // get customer info
+    const userData = await Customer.findById(order.customerId);
+    console.log("Customer Data:", userData);
+    await sendEmail({
+      to: userData.email,
+      subject: "Your Order is Placed 🎉",
+      html: `
             <h2>Hi ${userData.firstName},</h2>
             <h2>Order Placed Successfully 🎉</h2>
             <p>Your order ID is :<b>${order._id}</b>.</p>
@@ -146,8 +161,8 @@ const createOrder = async (req, res) => {
             <br/><br/><br/><br/><br/>
             <p>Thank you for shopping with us.</p>
           `
-        });
-    
+    });
+
     return res.status(201).json({
       message: "Order created successfully",
       order
@@ -232,10 +247,10 @@ const getOrderById = async (req, res) => {
 };
 const updateOrderStatus = async (req, res) => {
   try {
- const loggedInUser = req.session.user;
- console.log("Logged in user in updateOrderStatus:", loggedInUser);
+    const loggedInUser = req.session.user;
+    console.log("Logged in user in updateOrderStatus:", loggedInUser);
     if (!loggedInUser) {
-        return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
+      return res.status(400).send({ success: false, message: "Unauthorized User not logged in !!" });
     }
     console.log("Received request to update order status:", req.body);
 
@@ -278,21 +293,21 @@ const updateOrderStatus = async (req, res) => {
       createdBy: loggedInUser.id
     });
 
-      const statusList = await OrderStatus.find();
-      const currentStatus = statusList.find(status => status._id.toString() === statusId);
-     // get customer info
-        const userData = await Customer.findById(order.customerId);
-    
-        await sendEmail({
-          to: userData.email,
-          subject: `Your Order is ${currentStatus.name} 🎉` ,
-          html: `
+    const statusList = await OrderStatus.find();
+    const currentStatus = statusList.find(status => status._id.toString() === statusId);
+    // get customer info
+    const userData = await Customer.findById(order.customerId);
+
+    await sendEmail({
+      to: userData.email,
+      subject: `Your Order is ${currentStatus.name} 🎉`,
+      html: `
             <h2>Hi ${userData.firstName},</h2>
             <h2>${comment}</h2>
             <br/><br/><br/><br/><br/>
             <p>Thank you for shopping with us.</p>
           `
-        });
+    });
     return res.json({
       success: true,
       message: "Order status updated successfully",
